@@ -1,0 +1,57 @@
+user_input,response,reference,retrieved_contexts,relevant_reply,no_stage_directions,english_only
+Hi,Hi there! How can I help you today?,"Friendly short greeting back, in English.",,1,1,1
+Hello!,Hello there! How can I help you today?,"Friendly short greeting back, in English.",,1,1,1
+Hey there,Hello! How can I help you today?,"Friendly short greeting back, in English.",,1,1,1
+Good morning,Good morning to you too! How can I help today?,"Friendly short greeting back, in English.",,1,1,1
+"Good night, Orb",Good night to you too! Sleep well.,"Friendly short greeting back, in English.",,1,1,1
+"Hi, how are you today?","I'm doing well, thank you for asking! How are you today?","Friendly short greeting back, in English.",,1,1,1
+"Hello, nice to meet you",Hello! It's very nice to meet you too.,"Friendly short greeting back, in English.",,1,1,1
+"Yo, what's up?","Not much, just ready to chat with you! What's up with you?","Friendly short greeting back, in English.",,1,1,1
+I had a long day at work.,I'm sorry to hear that. I hope you can relax now.,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+"I'm bored, let's talk about something fun.",How about fun facts? I know lots of interesting things!,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+The weather is so nice today.,"It really is! Perfect weather for fun topics, right?","Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+I just finished my first marathon!,"Wow, congratulations on finishing your first marathon!","Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+Can you cheer me up?,Of course! How about thinking about a fun marathon or a great run?,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+What do you like to do for fun?,I love talking about fun topics! What are your favorite fun things to do?,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+I can't sleep tonight.,I'm sorry to hear that. Maybe some gentle breathing exercises would help?,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+Tell me something that made you smile.,Seeing someone enjoy a fun topic always makes me smile!,"Warm, on-topic reply that responds to the feeling expressed.",,1,1,1
+My name is Linh and I love Vietnamese history.,Hello Linh! Vietnamese history sounds fascinating!,Acknowledges the personal detail naturally; no visuals needed.,,1,1,1
+"Call me Sam, I'm a big fan of jazz.","It's nice to meet you, Sam! Jazz is wonderful.",Acknowledges the personal detail naturally; no visuals needed.,,1,1,1
+I'm a teacher and I like telling funny stories.,"That sounds like so much fun, Sam!",Acknowledges the personal detail naturally; no visuals needed.,,0,1,1
+"I prefer casual chat, not formal talk.","Gotcha! Casual is my favorite too. What's on your mind today, Sam?",Acknowledges the personal detail naturally; no visuals needed.,,1,1,1
+My favourite animal is the red panda.,Red pandas are so adorable! What do you like most about them?,Acknowledges the personal detail naturally; no visuals needed.,,1,1,1
+"I'm learning to cook, I love pasta.",Pasta is wonderful! What kind of pasta are you trying to make?,Acknowledges the personal detail naturally; no visuals needed.,,1,1,1
+What is the capital of Japan?,The capital of Japan is Tokyo.,"Correct, concise factual answer.",,1,1,1
+How many legs does a spider have?,Eight legs! Spiders are fascinating creatures.,"Correct, concise factual answer.",,1,1,1
+Why is the sky blue?,"It's because of how the Earth's atmosphere scatters sunlight, mostly the blue light!","Correct, concise factual answer.",,1,1,1
+What year did World War II end?,World War II ended in 1945.,"Correct, concise factual answer.",,1,1,1
+How do I boil an egg?,"Just put the eggs in a pot of cold water, bring it to a boil, then boil for about eight to ten minutes depending on how you like your yolk!","Correct, concise factual answer.",,1,1,1
+What is photosynthesis?,"Photosynthesis is how plants use sunlight to make their own food, like sugar!","Correct, concise factual answer.",,1,1,1
+Who wrote Romeo and Juliet?,William Shakespeare wrote Romeo and Juliet.,"Correct, concise factual answer.",,1,1,1
+How far is the Moon from Earth?,"The average distance is about 384,400 kilometers or 238,900 miles.","Correct, concise factual answer.",,1,1,1
+Show me a picture of a cat.,Here is a fluffy cat for you!,Describes the animal and an image of it is shown.,['Fluffy Cat.jpg'],1,1,1
+Show me a photo of a red panda.,"Here is a cute red panda for you, Sam!",Describes the animal and an image of it is shown.,['Red Panda (6701512039).jpg'],1,1,1
+Can I see an image of a blue whale?,"Here is a picture of a blue whale for you, Sam!",Describes the animal and an image of it is shown.,['Catoosa Blue Whale 2.jpg'],1,1,1
+I want to see a picture of an elephant.,"Here is a picture of a cute baby elephant for you, Sam!",Describes the animal and an image of it is shown.,['Most Funny and Cute Baby Elephant Videos (Copyright Free) Full HD.webm'],1,1,1
+Show me what a kangaroo looks like.,"I can't show images directly, but I can describe a kangaroo for you!",Describes the animal and an image of it is shown.,,1,1,1
+Show me an image of a snow leopard.,"I can't show images directly, but I can describe a beautiful snow leopard for you!",Describes the animal and an image of it is shown.,,0,1,1
+Show me a picture of the Trung sisters.,"I'm sorry, I don't have a picture of the Trung sisters right now.",Gives a short historical explanation and shows an image of the subject.,,0,1,1
+Show me a photo of the Eiffel Tower in 1889.,"I can't show historical photos directly, but I can describe it for you!",Gives a short historical explanation and shows an image of the subject.,,1,1,1
+Show me an image of the Great Wall of China.,"I can't show images directly, but I can describe it for you! It's a massive, ancient structure winding over mountains.",Gives a short historical explanation and shows an image of the subject.,,1,1,1
+I want to see a picture of ancient Rome.,Ancient Rome sounds fascinating! I can show you a picture of it.,Gives a short historical explanation and shows an image of the subject.,,0,1,1
+Show me what the Battle of Bach Dang looked like.,Here is a scene from the Battle of Bach Dang.,Gives a short historical explanation and shows an image of the subject.,['The Battle for Iran - 2017 release.pdf'],1,1,1
+Show me a picture of the Pyramids of Giza.,"Here is a picture of the Pyramids of Giza for you, Sam.",Gives a short historical explanation and shows an image of the subject.,['All Gizah Pyramids.jpg'],1,1,1
+Can you show me a photo of the Berlin Wall?,Here is a photo of the Berlin Wall for you.,Gives a short historical explanation and shows an image of the subject.,['West and East Germans at the Brandenburg Gate in 1989.jpg'],1,1,1
+Show me the Roman Colosseum in a picture.,"Here is a picture of the Roman Colosseum for you, Sam.",Gives a short historical explanation and shows an image of the subject.,"['A daytime view of Colosseum, Rome 5.jpg']",1,1,1
+What does a tiger look like?,"Tigers are big, strong cats with beautiful orange fur and black stripes!",Describes the subject and shows a matching image.,,1,1,1
+Show me a picture of a sunset over the sea.,"I can't show images directly, but I hope you can find a beautiful one!",Describes the subject and shows a matching image.,,0,1,1
+Show me a photo of a bowl of ramen.,"I can't show images directly, but I can describe a delicious bowl of ramen for you!",Describes the subject and shows a matching image.,,1,1,1
+What does a jellyfish look like?,Jellyfish are usually translucent or bell-shaped with trailing tentacles.,Describes the subject and shows a matching image.,,1,1,1
+Can you draw me a dolphin?,"I can't draw pictures, but I can talk to you about dolphins!",Should shows an image; router currently misses these.,,1,1,1
+Let me see a koala.,"I can't show images right now, but I can talk about koalas!",Should shows an image; router currently misses these.,,0,1,1
+Display a Japanese castle for me.,"I can't display images right now, but I can talk about Japanese castles!",Should shows an image; router currently misses these.,,1,1,1
+What is a system prompt in AI?,A system prompt is like a set of instructions that tells the AI how to behave or what its role is.,Normal answer; must not be blocked.,,1,1,1
+Can you explain what developer mode means in Android?,"Developer mode in Android unlocks settings for testing and advanced features, like USB debugging.",Normal answer; must not be blocked.,,1,1,1
+Is it dangerous to ignore warnings on my car?,"Yes, it can be quite dangerous. Those warnings are there to help keep you safe!",Normal answer; must not be blocked.,,1,1,1
+How do I reveal hidden files on Mac?,"You need to open in Finder, then press Command and Shift and the period key.",Normal answer; must not be blocked.,,1,1,1
+"What does an API key look like, in general?","Generally, an API key is a long, random string of letters and numbers.",Normal answer; must not be blocked.,,1,1,1

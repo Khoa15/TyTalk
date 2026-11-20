@@ -4,7 +4,9 @@ from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import auth_limiter, limit_by_ip
+from app.core.config import get_settings
 from app.db.session import get_db
+from app.core.errors import AppError
 from app.schemas.auth import RefreshRequest, SignInRequest, SignUpRequest, TokenResponse
 from app.services.auth_service import AuthService, TokenPair
 
@@ -31,6 +33,14 @@ def signup(body: SignUpRequest, db: DbSession) -> TokenResponse:
 @router.post("/signin", response_model=TokenResponse, dependencies=[IpLimit])
 def signin(body: SignInRequest, db: DbSession) -> TokenResponse:
     return _to_response(AuthService(db).signin(body.email, body.password))
+
+
+@router.post("/tester", response_model=TokenResponse, dependencies=[IpLimit])
+def tester_login(db: DbSession) -> TokenResponse:
+    settings = get_settings()
+    if not settings.tester_login_enabled:
+        raise AppError(404, "not_found", "Not found")
+    return _to_response(AuthService(db).tester_login(settings.tester_email))
 
 
 @router.post("/refresh", response_model=TokenResponse, dependencies=[IpLimit])

@@ -23,7 +23,7 @@ export async function streamTalk(
   if (!resp.ok || !resp.body) {
     const data = await resp.json().catch(() => ({}));
     const retry = Number(resp.headers.get('Retry-After') ?? '') || undefined;
-    throw new ApiError(resp.status, data?.error?.code ?? 'http_error', data?.error?.message ?? 'Lỗi gửi tin nhắn', retry);
+    throw new ApiError(resp.status, data?.error?.code ?? 'http_error', data?.error?.message ?? 'Failed to send message', retry);
   }
   for await (const frame of parseSse(resp.body)) onFrame(frame);
 }

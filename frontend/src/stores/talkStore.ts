@@ -3,13 +3,24 @@ import { create } from 'zustand';
 import type { OrbState } from '../components/orb/TyTalkOrb';
 import { playWavBase64 } from '../lib/audio';
 import { createSpeechRecognizer, type SpeechRecognizer } from '../lib/speech';
-import { TimelinePlayer, type AudioEvt, type ImageEvt, type SegmentEvt } from '../lib/timelinePlayer';
+import {
+  TimelinePlayer,
+  type AudioEvt,
+  type EntityEvt,
+  type FormEvt,
+  type ImageEvt,
+  type SegmentEvt,
+} from '../lib/timelinePlayer';
+import type { OrbForm, SimEvt } from '../lib/space/types';
 import { ApiError } from '../services/apiClient';
 import type { SseFrame } from '../services/sse';
 import { streamTalk, type RecentMessage } from '../services/talkApi';
 import { useAuthStore } from './authStore';
 
 const HISTORY_LIMIT = 6;
+
+/** Visuals that the timeline turns off at the end of a reply. */
+const SPACE_RESET = { orbForm: 'orb' as OrbForm, entities: [], sim: null };
 
 /** One line in the chat log: what the user said (right) or what Orb says (left). */
 export interface ChatLine {
@@ -28,6 +39,12 @@ interface TalkState {
   interim: string;
   listening: boolean;
   orbState: OrbState;
+  /** Orb body form (eyes stay the same). */
+  orbForm: OrbForm;
+  /** Entities on stage. `startedAt` is when they appeared, on the performance.now() clock. */
+  entities: { evt: EntityEvt; startedAt: number }[];
+  /** The simulation on stage, if any. */
+  sim: { evt: SimEvt; startedAt: number } | null;
   image: ImageEvt | null;
   busy: boolean;
   error: string | null;
@@ -50,6 +67,9 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
   interim: '',
   listening: false,
   orbState: 'idle',
+  orbForm: 'orb',
+  entities: [],
+  sim: null,
   image: null,
   busy: false,
   error: null,
@@ -61,7 +81,7 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
     if (get().listening || get().busy) return;
     const rec = createSpeechRecognizer();
     if (!rec) {
-      set({ error: 'Trình duyệt này chưa hỗ trợ nhận giọng nói' });
+      set({ error: 'This browser does not support voice input' });
       return;
     }
     let finalText = '';
@@ -76,8 +96,8 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
     };
     rec.onerror = (e) => {
       const msg = e.error === 'not-allowed' || e.error === 'service-not-allowed'
-        ? 'Chưa cấp quyền sử dụng micro'
-        : 'Không nghe rõ, bạn thử lại nhé';
+        ? 'Microphone permission not granted'
+        : "I didn't catch that, please try again";
       set({ error: msg, listening: false, interim: '' });
     };
     rec.onend = () => {
@@ -101,7 +121,7 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
 
     const token = await useAuthStore.getState().ensureToken();
     if (!token) {
-      set({ error: 'Phiên đăng nhập đã hết hạn' });
+      set({ error: 'Your session has expired' });
       return;
     }
 
@@ -142,9 +162,13 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       onAudio: (clip: AudioEvt) => {
         if (get().speakEnabled) playWavBase64(clip.wav_base64);
       },
+      onForm: (form) => set({ orbForm: form ?? 'orb' }),
+      onEntities: (active) =>
+        set({ entities: active.map((evt) => ({ evt, startedAt: performance.now() })) }),
+      onSim: (sim) => set({ sim: sim ? { evt: sim, startedAt: performance.now() } : null }),
       onEnd: () => {
         finished = true;
-        set({ busy: false, orbState: 'idle', image: null });
+        set({ busy: false, orbState: 'idle', image: null, ...SPACE_RESET });
       },
     });
 
@@ -172,6 +196,18 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
           anchorOn(data.at_ms);
           player.addAudio(data as unknown as AudioEvt);
           break;
+        case 'form':
+          anchorOn(data.at_ms);
+          player.addForm(data as unknown as FormEvt);
+          break;
+        case 'entity':
+          anchorOn(data.at_ms);
+          player.addEntity(data as unknown as EntityEvt);
+          break;
+        case 'sim':
+          anchorOn(data.at_ms);
+          player.addSim(data as unknown as SimEvt);
+          break;
         case 'text': {
           replyText += String(data.delta ?? '');
           set({
@@ -186,7 +222,7 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
           player.finish(Number(data.total_ms ?? 0));
           break;
         case 'error':
-          set({ error: 'Trợ lý đang bận, bạn thử lại sau nhé' });
+          set({ error: 'Orb is busy right now, please try again shortly' });
           break;
         default:
           break;
@@ -198,15 +234,15 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       await streamTalk(message, recent, token, onFrame);
     } catch (err) {
       const msg = err instanceof ApiError && err.status === 429
-        ? 'Bạn thao tác quá nhanh, thử lại sau nhé'
-        : 'Không gửi được tin nhắn';
+        ? 'Too many requests, please slow down'
+        : 'Could not send your message';
       set({ error: msg });
     } finally {
       // Only cut playback short when no `done` arrived (error or dropped stream).
       if (!doneReceived && !finished) {
         player.stop();
         finished = true;
-        set({ busy: false, orbState: 'idle', image: null });
+        set({ busy: false, orbState: 'idle', image: null, ...SPACE_RESET });
       }
     }
 

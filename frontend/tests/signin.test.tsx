@@ -8,7 +8,7 @@ import { useAuthStore } from '../src/stores/authStore';
 describe('SignInPage', () => {
   it('shows the server error message when credentials are wrong', async () => {
     useAuthStore.setState({
-      signin: vi.fn().mockRejectedValue(new ApiError(401, 'invalid_credentials', 'Sai email hoặc mật khẩu')),
+      signin: vi.fn().mockRejectedValue(new ApiError(401, 'invalid_credentials', 'Wrong email or password')),
     } as never);
 
     render(
@@ -18,10 +18,10 @@ describe('SignInPage', () => {
     );
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
-    fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: 'wrong-pass' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong-pass' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Sai email hoặc mật khẩu'));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Wrong email or password'));
   });
 
   it('shows a retry hint on 429', async () => {
@@ -35,9 +35,9 @@ describe('SignInPage', () => {
       </MemoryRouter>,
     );
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
-    fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: 'x' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'x' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Thử lại sau 42 giây'));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Too many attempts, try again in 42 seconds'));
   });
 });

@@ -37,3 +37,7 @@
 @media (prefers-reduced-motion: reduce) {
   .tyorb-star, .tyorb-spark-item, .tyorb-z { animation: none; }
 }
+
+/* Space forms: the design-board art draws the body; dark eyes keep the pill eyes readable on bright bodies. */
+.tyorb[data-form="sun"] .tyorb-eye, .tyorb[data-form="earth"] .tyorb-eye, .tyorb[data-form="moon"] .tyorb-eye { fill: #1c1233; }
+.tyorb[data-form="sun"] .tyorb-stroke, .tyorb[data-form="earth"] .tyorb-stroke, .tyorb[data-form="moon"] .tyorb-stroke { stroke: #1c1233; }

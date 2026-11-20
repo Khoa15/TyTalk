@@ -1,0 +1,24 @@
+/** Types for the design-board art generators (designArt.js). Each returns an SVG markup string. */
+export const C: Record<string, string>;
+export function f(n: number): number;
+export function clamp(x: number, a?: number, b?: number): number;
+export function ease(x: number): number;
+export function loop(t: number, period: number, phase?: number): number;
+export function pill(x: number, y: number, w: number, h: number, fill: string, op?: number): string;
+export function poly(pts: number[][], fill: string, op?: number): string;
+export function circ(cx: number, cy: number, r: number, fill: string, op?: number): string;
+export function sphere(cx: number, cy: number, r: number, dark: string, light: string, k?: number, ang?: number): string;
+export function shade(cx: number, cy: number, r: number, ang: number, color?: string, op?: number, k?: number): string;
+export function rays(cx: number, cy: number, r0: number, n: number, t: number, long: number, short: number, fill: string, spin?: number): string;
+export function streak(o: { len: number; h: number; bands: string[]; dash: string[]; head: string; t: number }): string;
+export const STREAKS: Record<'comet' | 'meteor' | 'meteorite' | 'fireball' | 'meteoroid', (t: number) => string>;
+export function asteroid(t: number, s?: number): string;
+export function place(x: number, y: number, rot: number, scale: number, body: string, op?: number): string;
+export function fadeIO(u: number): number;
+export function cometShower(t: number, scale: number): string;
+export function flyer(kind: 'comet' | 'meteor' | 'meteorite' | 'fireball' | 'meteoroid', t: number, scale: number): string;
+export function orbitPose(kind: 'rocket' | 'astronaut' | 'satellite' | 'probe', t: number): string;
+export function earthLand(cx: number, cy: number, r: number, t: number, speed: number): string;
+export const FORMS: Record<'sun' | 'earth' | 'moon' | 'galaxy' | 'blackhole', (t: number) => string>;
+export const SIMS: Record<string, { cap: (p: number) => string; draw: (t: number, p: number) => string }>;
+export function starfield(n: number, seed: number, w?: number, h?: number): string;

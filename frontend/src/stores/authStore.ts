@@ -36,6 +36,7 @@ interface AuthState {
 
   signup: (email: string, password: string, displayName: string) => Promise<void>;
   signin: (email: string, password: string) => Promise<void>;
+  testerLogin: () => Promise<void>;
   signout: () => Promise<void>;
   /** Returns a usable access token, refreshing it when close to expiry. Null when signed out. */
   ensureToken: () => Promise<string | null>;
@@ -65,6 +66,11 @@ export const useAuthStore = create<AuthState>()(
 
       signin: async (email, password) => {
         set(applyPair(await authApi.signin(email, password)));
+        await get().loadMe();
+      },
+
+      testerLogin: async () => {
+        set(applyPair(await authApi.tester()));
         await get().loadMe();
       },
 

@@ -4,6 +4,9 @@ Allowed objects (anything else is dropped):
   {"type": "say",   "text": "..."}                       -> spoken + subtitles
   {"type": "state", "state": "<orb state>", "seconds": n} -> orb state (action, never spoken)
   {"type": "image", "query": "...", "seconds": n}         -> image (action, never spoken)
+  {"type": "form", "form": "<orb form>", "seconds": n}     -> Orb body form (action)
+  {"type": "entity", "kind": "<entity>", "count": n, "seconds": n} -> summoned entity (action)
+  {"type": "sim", "id": "<sim>", "params": {...}, "seconds": n}    -> astronomy simulation (action)
 
 Only "say" produces Text. Stray prose outside JSON is discarded, so stage directions
 such as "*waves*" can never reach TTS or subtitles.
@@ -13,7 +16,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from app.harness.states import ORB_STATES
+from app.harness.states import ENTITY_KINDS, MAX_ENTITY_COUNT, ORB_FORMS, ORB_STATES, SIM_IDS
 
 DEFAULT_SECONDS = 2.0
 MAX_LINE_CHARS = 1000
@@ -38,7 +41,27 @@ class ImageTag:
     seconds: float
 
 
-Item = Text | StateTag | ImageTag
+@dataclass(frozen=True)
+class FormTag:
+    form: str
+    seconds: float
+
+
+@dataclass(frozen=True)
+class EntityTag:
+    kind: str
+    count: int
+    seconds: float
+
+
+@dataclass(frozen=True)
+class SimTag:
+    sim_id: str
+    params: tuple[tuple[str, str], ...]  # sorted (name, value) pairs, already whitelisted
+    seconds: float
+
+
+Item = Text | StateTag | ImageTag | FormTag | EntityTag | SimTag
 
 
 class StreamParser:
@@ -98,7 +121,42 @@ def _to_item(obj: dict[str, Any]) -> Item | None:
             return ImageTag(query.strip()[:MAX_QUERY_CHARS], seconds)
         return None
 
+    if kind == "form":
+        form = obj.get("form")
+        return FormTag(form, seconds) if form in ORB_FORMS else None
+
+    if kind == "entity":
+        entity = obj.get("kind")
+        if entity not in ENTITY_KINDS:
+            return None
+        return EntityTag(entity, _count(obj.get("count")), seconds)
+
+    if kind == "sim":
+        sim_id = obj.get("id")
+        if sim_id not in SIM_IDS:
+            return None
+        return SimTag(sim_id, _sim_params(sim_id, obj.get("params")), seconds)
+
     return None
+
+
+def _count(value: Any) -> int:
+    if isinstance(value, int) and not isinstance(value, bool):
+        return max(1, min(MAX_ENTITY_COUNT, value))
+    return 1
+
+
+def _sim_params(sim_id: str, raw: Any) -> tuple[tuple[str, str], ...]:
+    """Keep only params the sim declares, with values from its allowed list."""
+    if not isinstance(raw, dict):
+        return ()
+    allowed = SIM_IDS[sim_id]
+    kept = [
+        (name, value)
+        for name, value in raw.items()
+        if name in allowed and value in allowed[name]
+    ]
+    return tuple(sorted(kept))
 
 
 def _seconds(value: Any) -> float:

@@ -5,15 +5,18 @@ import { AuthForm } from './AuthForm';
 
 export function SignInPage() {
   const signin = useAuthStore((s) => s.signin);
+  const testerLogin = useAuthStore((s) => s.testerLogin);
   const navigate = useNavigate();
   return (
     <AuthForm
-      title="Đăng nhập"
-      submitLabel="Đăng nhập"
+      route="/signin"
+      title="Sign In"
+      submitLabel="Sign in"
       showName={false}
       onSubmit={(email, password) => signin(email, password)}
       onDone={() => navigate('/talk')}
-      footer={<>Chưa có tài khoản? <Link to="/signup">Đăng ký</Link></>}
+      onTester={testerLogin}
+      footer={<>No account yet? <Link to="/signup">Sign up</Link></>}
     />
   );
 }

@@ -21,6 +21,7 @@ export const authApi = {
     }),
   signin: (email: string, password: string) =>
     apiRequest<TokenPair>('/auth/signin', { method: 'POST', body: { email, password } }),
+  tester: () => apiRequest<TokenPair>('/auth/tester', { method: 'POST' }),
   refresh: (refreshToken: string) =>
     apiRequest<TokenPair>('/auth/refresh', { method: 'POST', body: { refresh_token: refreshToken } }),
   signout: (refreshToken: string) =>

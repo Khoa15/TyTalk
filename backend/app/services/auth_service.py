@@ -36,7 +36,7 @@ class AuthService:
     def signup(self, email: str, password: str, display_name: str) -> TokenPair:
         email = email.lower()
         if self._users.get_by_email(email):
-            raise AppError(409, "email_taken", "Email đã được sử dụng")
+            raise AppError(409, "email_taken", "Email is already in use")
         user = self._users.create(email, hash_password(password), display_name)
         pair = self._issue(user.id)
         self._db.commit()
@@ -47,7 +47,7 @@ class AuthService:
         stored_hash = user.password_hash if user else _DUMMY_HASH
         password_ok = verify_password(stored_hash, password)
         if user is None or not password_ok:
-            raise AppError(401, "invalid_credentials", "Sai email hoặc mật khẩu")
+            raise AppError(401, "invalid_credentials", "Wrong email or password")
         pair = self._issue(user.id)
         self._db.commit()
         return pair
@@ -56,9 +56,18 @@ class AuthService:
         """Rotate: the presented refresh token is revoked and a new pair is issued."""
         row = self._tokens.get_active(hash_refresh_token(raw_refresh_token))
         if row is None:
-            raise AppError(401, "invalid_refresh_token", "Phiên đăng nhập đã hết hạn")
+            raise AppError(401, "invalid_refresh_token", "Session has expired")
         self._tokens.revoke(row)
         pair = self._issue(row.user_id)
+        self._db.commit()
+        return pair
+
+    def tester_login(self, email: str) -> TokenPair:
+        """Dev-only: sign in as the shared tester account. The password is random and never disclosed."""
+        user = self._users.get_by_email(email)
+        if user is None:
+            user = self._users.create(email, hash_password(new_refresh_token()), "Tester")
+        pair = self._issue(user.id)
         self._db.commit()
         return pair
 

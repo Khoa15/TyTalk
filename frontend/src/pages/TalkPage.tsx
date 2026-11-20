@@ -1,14 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChatLog } from '../components/ChatLog';
-import { TyTalkOrb } from '../components/orb/TyTalkOrb';
+import { OrbSlot } from '../components/OrbSlot';
+import { SpaceLayer } from '../components/space/SpaceLayer';
 import { TalkInput } from '../components/TalkInput';
 import { useAuthStore } from '../stores/authStore';
 import { useTalkStore } from '../stores/talkStore';
 
 export function TalkPage() {
   const orbState = useTalkStore((s) => s.orbState);
+  const entities = useTalkStore((s) => s.entities);
+  const sim = useTalkStore((s) => s.sim);
+  const orbForm = useTalkStore((s) => s.orbForm);
   const busy = useTalkStore((s) => s.busy);
   const error = useTalkStore((s) => s.error);
   const speakEnabled = useTalkStore((s) => s.speakEnabled);
@@ -25,6 +29,7 @@ export function TalkPage() {
   const expressiveness = traits && (traits.humor || traits.tone) ? 0.9 : 0.5;
   const loadMe = useAuthStore((s) => s.loadMe);
   const navigate = useNavigate();
+  const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadMe().catch(() => undefined);
@@ -44,13 +49,14 @@ export function TalkPage() {
     <main className="talk-page">
       <div className="talk-top">
         <button className="chip" onClick={toggleSpeak} aria-pressed={speakEnabled}>
-          {speakEnabled ? 'Tắt giọng' : 'Bật giọng'}
+          {speakEnabled ? 'Mute voice' : 'Unmute voice'}
         </button>
-        <button className="chip" onClick={onSignout}>Đăng xuất</button>
+        <button className="chip" onClick={onSignout}>Sign out</button>
       </div>
 
-      <div className="stage">
-        <TyTalkOrb state={orbState} size={300} expressiveness={expressiveness} aria-label="Nhân vật Orb" />
+      <div className="stage" ref={stageRef}>
+        <SpaceLayer entities={entities} sim={sim} anchorRef={stageRef} />
+        <OrbSlot route="/talk" size={300} state={orbState} form={orbForm} expressiveness={expressiveness} />
       </div>
 
       <div className="talk-dock">

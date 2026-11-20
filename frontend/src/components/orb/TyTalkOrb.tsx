@@ -1,5 +1,16 @@
 import { useEffect, useId, useRef, type CSSProperties } from 'react';
 import './TyTalkOrb.css';
+import type { OrbForm } from '../../lib/space/types';
+import { FormArt } from './FormArt';
+
+/** Body palettes for the space forms. The eyes never change. */
+export const FORM_PALETTE: Record<Exclude<OrbForm, 'orb'>, { glow: string; glow2: string }> = {
+  sun: { glow: '#ffb020', glow2: '#ff5a1f' },
+  earth: { glow: '#3fb6ff', glow2: '#2e8b57' },
+  moon: { glow: '#c9c9d4', glow2: '#7b7b88' },
+  galaxy: { glow: '#b48bff', glow2: '#3b2a7a' },
+  blackhole: { glow: '#ff9a3c', glow2: '#120a1f' },
+};
 
 export type OrbState =
   | 'idle' | 'talking' | 'working' | 'cute'
@@ -27,6 +38,8 @@ export interface TyTalkOrbFrame { scale: number; x: number; y: number; tilt: num
 
 export interface TyTalkOrbProps {
   state?: OrbState;
+  /** Body form for space topics. Eyes stay the same. */
+  form?: OrbForm;
   /** CSS width of the character. Height follows. */
   size?: number | string;
   /** 0..1 speech level (e.g. from an audio analyser). Only used while state is "talking"; if omitted a speech rhythm is simulated. */
@@ -153,7 +166,7 @@ export function targetPose(st: OrbState, t: number, since: number, level: number
 }
 
 export function TyTalkOrb({
-  state = 'idle', size = 280, level, expressiveness = 0.5, onFrame, className, style, 'aria-label': ariaLabel,
+  state = 'idle', form = 'orb', size = 280, level, expressiveness = 0.5, onFrame, className, style, 'aria-label': ariaLabel,
 }: TyTalkOrbProps) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const id = (n: string) => `${uid}-${n}`;
@@ -167,6 +180,8 @@ export function TyTalkOrb({
   const faceRef = useRef<SVGGElement>(null);
 
   const stateRef = useRef<OrbState>(state);
+  const formRef = useRef<OrbForm>(form);
+  formRef.current = form;
   const levelRef = useRef<number | undefined>(level);
   const expressRef = useRef(expressiveness);
   const frameRef = useRef(onFrame);
@@ -174,6 +189,16 @@ export function TyTalkOrb({
   expressRef.current = expressiveness;
   frameRef.current = onFrame;
   stateRef.current = state;
+
+  // A form change must restyle the orb at once, not wait for the next state change.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const palette = form === 'orb' ? ORB_META[stateRef.current] : FORM_PALETTE[form];
+    svg.setAttribute('data-form', form);
+    svg.style.setProperty('--orb-glow', palette.glow);
+    svg.style.setProperty('--orb-glow2', palette.glow2);
+  }, [form]);
 
   useEffect(() => {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -189,12 +214,19 @@ export function TyTalkOrb({
     const pos: Pose = { ...REST };
     const vel: Pose = { sc: 0, x: 0, y: 0, tilt: 0, glow: 0, eyeY: 0, look: 0, fx: 0, fy: 0 };
     let faceSy = 1, faceVy = 0;
+    // Idle gaze: the pill eyes follow the mouse pointer, smoothed so they never snap.
+    let pointer: { x: number; y: number } | null = null;
+    let gx = 0, gy = 0;
+    const onPointer = (e: PointerEvent) => { pointer = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('pointermove', onPointer);
 
     const applyShown = (st: OrbState) => {
+      const palette = formRef.current === 'orb' ? ORB_META[st] : FORM_PALETTE[formRef.current];
       svg.setAttribute('data-state', st);
       svg.setAttribute('data-eyes', ORB_META[st].eyes);
-      svg.style.setProperty('--orb-glow', ORB_META[st].glow);
-      svg.style.setProperty('--orb-glow2', ORB_META[st].glow2);
+      svg.setAttribute('data-form', formRef.current);
+      svg.style.setProperty('--orb-glow', palette.glow);
+      svg.style.setProperty('--orb-glow2', palette.glow2);
     };
     const kick = (from: OrbState, to: OrbState) => {
       const edge = EDGE_KICK[`${from}>${to}`] ?? ENTRY_KICK[to] ?? {};
@@ -265,14 +297,28 @@ export function TyTalkOrb({
         `translate(${pos.fx.toFixed(2)} ${(200 + pos.fy).toFixed(2)}) scale(1 ${faceSy.toFixed(3)}) translate(0 -200)`,
       );
       glowRef.current?.setAttribute('opacity', pos.glow.toFixed(3));
-      if (pillRef.current) pillRef.current.style.transform = `translate(${pos.look.toFixed(2)}px,0) scale(1,${(blink * pos.eyeY).toFixed(3)})`;
+      // Gaze target: only while idle and only when the pointer is known.
+      const rect = svg.getBoundingClientRect();
+      let tgx = 0, tgy = 0;
+      if (shown === 'idle' && pointer && rect.width > 0) {
+        const dx = (pointer.x - (rect.left + rect.width / 2)) / rect.width;
+        const dy = (pointer.y - (rect.top + rect.height / 2)) / rect.height;
+        tgx = Math.max(-12, Math.min(12, dx * 26 * k));
+        tgy = Math.max(-9, Math.min(9, dy * 18 * k));
+      }
+      gx += (tgx - gx) * Math.min(1, dt * 8);
+      gy += (tgy - gy) * Math.min(1, dt * 8);
+      if (pillRef.current) pillRef.current.style.transform = `translate(${((shown === 'idle' && pointer ? 0 : pos.look) + gx).toFixed(2)}px,${gy.toFixed(2)}px) scale(1,${(blink * pos.eyeY).toFixed(3)})`;
       orbitRef.current?.setAttribute('transform', `rotate(${(orbitA % 360).toFixed(1)} 200 200)`);
       frameRef.current?.({ scale: pos.sc, x: pos.x, y: pos.y, tilt: pos.tilt, glow: pos.glow });
 
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onPointer);
+    };
   }, []);
 
   const meta = ORB_META[state];
@@ -338,6 +384,8 @@ export function TyTalkOrb({
         <g clipPath={ref('clip')}><rect className="tyorb-tint" width="400" height="400" mask={ref('mask')} opacity=".75" /></g>
         <circle cx="200" cy="200" r="86" fill="none" stroke={ref('rimG')} strokeWidth="4" opacity=".9" />
         <ellipse cx="166" cy="150" rx="22" ry="10" fill="#fff" opacity=".16" transform="rotate(-35 166 150)" filter={ref('soft')} />
+
+        {form !== 'orb' && <FormArt form={form} />}
 
         {/* ---------- eyes: no mouth on this character ---------- */}
         <g ref={faceRef}>

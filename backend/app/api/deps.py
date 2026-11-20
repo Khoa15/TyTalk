@@ -36,14 +36,14 @@ def get_current_user(
     db: Annotated[Session, Depends(get_db)],
 ) -> User:
     if creds is None:
-        raise AppError(401, "unauthorized", "Thiếu access token")
+        raise AppError(401, "unauthorized", "Missing access token")
     try:
         user_id = decode_access_token(creds.credentials)
     except jwt.PyJWTError as exc:
-        raise AppError(401, "unauthorized", "Access token không hợp lệ") from exc
+        raise AppError(401, "unauthorized", "Invalid access token") from exc
     user = UserRepository(db).get_by_id(user_id)
     if user is None:
-        raise AppError(401, "unauthorized", "Người dùng không tồn tại")
+        raise AppError(401, "unauthorized", "User does not exist")
     return user
 
 
@@ -56,7 +56,7 @@ def _enforce(limiter: RateLimiter, key: str) -> None:
         raise AppError(
             429,
             "rate_limited",
-            "Bạn thao tác quá nhanh, thử lại sau nhé",
+            "You are acting too fast, please try again later",
             headers={"Retry-After": str(math.ceil(retry_after))},
         )
 
@@ -69,7 +69,7 @@ def limit_by_ip(limiter: RateLimiter):
     return dependency
 
 
-def limit_by_user(limiter: RateLimiter):
+def limit_by_user(limiter: RateLimiter):  # kept for per-account limits
     def dependency(user: CurrentUser) -> None:
         _enforce(limiter, f"user:{user.id}")
 

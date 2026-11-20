@@ -1,0 +1,19 @@
+{
+ "words": [
+  {
+   "text": "Hi!",
+   "file": "word-0.wav",
+   "duration_ms": 725
+  },
+  {
+   "text": "I am",
+   "file": "word-1.wav",
+   "duration_ms": 650
+  },
+  {
+   "text": "TyTalk.",
+   "file": "word-2.wav",
+   "duration_ms": 832
+  }
+ ]
+}

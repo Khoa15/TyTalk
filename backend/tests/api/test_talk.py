@@ -73,3 +73,40 @@ def test_empty_llm_reply_is_reported_as_error_not_success(monkeypatch):
     events = asyncio.run(collect_events())
     assert events[-1] == "error"
     assert "done" not in events
+
+
+def test_space_visual_lines_reach_the_stream_as_events(monkeypatch):
+    """form / entity / sim lines from the LLM become SSE events with timing, and bad ones are dropped."""
+    import asyncio
+
+    from app.api.deps import get_harness
+    from app.harness.facade import Harness, UserContext
+
+    lines = (
+        '{"type": "say", "text": "The Moon changes shape!"}\n'
+        '{"type": "form", "form": "moon", "seconds": 3}\n'
+        '{"type": "form", "form": "dragon", "seconds": 3}\n'
+        '{"type": "entity", "kind": "comet", "count": 1, "seconds": 4}\n'
+        '{"type": "sim", "id": "moon_phases", "params": {"highlight": "full"}, "seconds": 6}\n'
+    )
+
+    class _ScriptedProvider:
+        async def stream(self, messages):
+            yield lines
+
+    harness = get_harness()
+    monkeypatch.setattr(harness, "provider", _ScriptedProvider())
+
+    async def collect():
+        ctx = UserContext(user_id=1, traits={})
+        return [e async for e in harness.respond(ctx, "why does the moon change shape?", [])]
+
+    events = asyncio.run(collect())
+    names = [e["event"] for e in events]
+    assert "form" in names and "entity" in names and "sim" in names
+    form = next(e["data"] for e in events if e["event"] == "form")
+    assert form["form"] == "moon"
+    sim = next(e["data"] for e in events if e["event"] == "sim")
+    assert sim == {"id": "moon_phases", "params": {"highlight": "full"}, "at_ms": sim["at_ms"], "duration_ms": 6000}
+    assert names.count("form") == 1  # "dragon" was rejected by the whitelist
+    assert names[-1] == "done"

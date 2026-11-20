@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from app.api.deps import CurrentUser, get_harness, limit_by_user, talk_limiter
+from app.api.deps import CurrentUser, get_harness, limit_by_ip, talk_limiter
 from app.db.session import get_db
 from app.harness.facade import Harness, UserContext
 from app.schemas.talk import TalkRequest
@@ -16,7 +16,7 @@ from app.services.persona_service import PersonaService, schedule_persona_learni
 router = APIRouter(tags=["talk"])
 
 DbSession = Annotated[Session, Depends(get_db)]
-UserLimit = Depends(limit_by_user(talk_limiter))
+IpTalkLimit = Depends(limit_by_ip(talk_limiter))
 
 SSE_DESCRIPTION = (
     "Server-Sent Events. Each frame is `event: <name>` + `data: <json>`.\n\n"
@@ -25,6 +25,9 @@ SSE_DESCRIPTION = (
     "- segment: {index, state, at_ms, duration_ms}  (max 3)\n"
     "- text: {delta, char_offset}\n"
     "- image: {url, caption, char_offset, at_ms, duration_ms}  (max 5)\n"
+    "- form: {form, at_ms, duration_ms}  (max 2; Orb body shape)\n"
+    "- entity: {kind, count, at_ms, duration_ms}  (max 3; summoned object)\n"
+    "- sim: {id, params, at_ms, duration_ms}  (max 1; astronomy simulation)\n"
     "- done: {total_ms}\n"
     "- error: {code}\n\n"
     "at_ms is relative to the start of the reply; the client plays it on one local clock."
@@ -37,7 +40,7 @@ def sse_encode(evt: dict[str, Any]) -> str:
 
 @router.post(
     "/talk",
-    dependencies=[UserLimit],
+    dependencies=[IpTalkLimit],
     responses={200: {"content": {"text/event-stream": {}}, "description": SSE_DESCRIPTION}},
 )
 async def talk(

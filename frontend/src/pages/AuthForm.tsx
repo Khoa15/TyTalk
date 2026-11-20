@@ -1,17 +1,23 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+
+import { OrbSlot } from '../components/OrbSlot';
+import type { Route } from '../lib/transitionGraph';
 
 import { ApiError } from '../services/apiClient';
 
 export interface AuthFormProps {
+  route: Route;
   title: string;
   submitLabel: string;
   showName: boolean;
   onSubmit: (email: string, password: string, name: string) => Promise<void>;
   onDone: () => void;
   footer: ReactNode;
+  onTester: () => Promise<void>;
 }
 
-export function AuthForm({ title, submitLabel, showName, onSubmit, onDone, footer }: AuthFormProps) {
+export function AuthForm({ route, title, submitLabel, showName, onSubmit, onDone, footer, onTester }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -27,10 +33,23 @@ export function AuthForm({ title, submitLabel, showName, onSubmit, onDone, foote
       onDone();
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
-        setError(`Thử lại sau ${err.retryAfter ?? 60} giây`);
+        setError(`Too many attempts, try again in ${err.retryAfter ?? 60} seconds`);
       } else {
-        setError(err instanceof ApiError ? err.message : 'Không kết nối được máy chủ');
+        setError(err instanceof ApiError ? err.message : 'Could not reach the server');
       }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const runTester = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      await onTester();
+      onDone();
+    } catch (err) {
+      setError(err instanceof ApiError && err.status === 429 ? 'Too many requests, try again shortly' : 'Tester login is unavailable');
     } finally {
       setBusy(false);
     }
@@ -39,10 +58,17 @@ export function AuthForm({ title, submitLabel, showName, onSubmit, onDone, foote
   return (
     <main className="auth-page">
       <form className="auth-card" onSubmit={submit} aria-label={title}>
+        <Link to="/" className="back-btn" aria-label="Back to home" title="Back to home">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+        </Link>
+        <OrbSlot route={route} size={240} className="auth-orb-slot" />
         <h1>{title}</h1>
         {showName && (
           <label>
-            Tên hiển thị
+            Display name
             <input value={name} onChange={(e) => setName(e.target.value)} maxLength={50} required />
           </label>
         )}
@@ -51,7 +77,7 @@ export function AuthForm({ title, submitLabel, showName, onSubmit, onDone, foote
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
-          Mật khẩu
+          Password
           <input
             type="password"
             value={password}
@@ -62,6 +88,9 @@ export function AuthForm({ title, submitLabel, showName, onSubmit, onDone, foote
         </label>
         {error && <p role="alert" className="error">{error}</p>}
         <button type="submit" disabled={busy}>{submitLabel}</button>
+        <button type="button" className="tester-btn" disabled={busy} onClick={() => void runTester()}>
+          Login as a Tester
+        </button>
         <p className="footer">{footer}</p>
       </form>
     </main>

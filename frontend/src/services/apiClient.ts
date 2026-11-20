@@ -34,7 +34,7 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   if (!resp.ok) {
     const err = data?.error ?? {};
     const retry = Number(resp.headers.get('Retry-After') ?? '') || undefined;
-    throw new ApiError(resp.status, err.code ?? 'http_error', err.message ?? 'Có lỗi xảy ra', retry);
+    throw new ApiError(resp.status, err.code ?? 'http_error', err.message ?? 'Something went wrong', retry);
   }
   return data as T;
 }

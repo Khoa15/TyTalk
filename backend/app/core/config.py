@@ -30,7 +30,11 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 800
 
     auth_rate_limit_per_minute: int = 5
-    talk_rate_limit_per_minute: int = 20
+    # Talk is limited per client IP: 10 requests per minute.
+    talk_rate_limit_per_minute: int = 10
+    # Dev only: exposes POST /auth/tester, a passwordless login for the shared tester account.
+    tester_login_enabled: bool = False
+    tester_email: str = "tester@tytalk.local"
 
     # Wikimedia returns thumbnails on thumb.wikimedia.org, originals on upload.wikimedia.org.
     # Local TTS (tiny-voca, ONNX, CPU). Missing model files disable TTS; text still streams.

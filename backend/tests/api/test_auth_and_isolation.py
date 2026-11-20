@@ -46,7 +46,7 @@ def test_wrong_password_is_rejected_without_detail(client):
         json={"email": tokens["email"], "password": "wrong-password-xyz"},
     )
     assert resp.status_code == 401
-    assert resp.json()["error"]["message"] == "Sai email hoặc mật khẩu"
+    assert resp.json()["error"]["message"] == "Wrong email or password"
 
 
 def test_signin_is_rate_limited_per_ip(client, monkeypatch):
@@ -76,3 +76,28 @@ def test_api_version_header_is_present(client):
     resp = client.get("/api/v1/health")
     assert resp.status_code == 200
     assert resp.headers["X-API-Version"] == "1"
+
+
+def test_tester_login_is_hidden_unless_enabled(client, monkeypatch):
+    from app.api.v1 import auth as auth_module
+
+    class Off:
+        tester_login_enabled = False
+        tester_email = "tester@tytalk.local"
+
+    monkeypatch.setattr(auth_module, "get_settings", lambda: Off())
+    assert client.post("/api/v1/auth/tester").status_code == 404
+
+
+def test_tester_login_returns_a_working_session(client, monkeypatch):
+    from app.api.v1 import auth as auth_module
+
+    class On:
+        tester_login_enabled = True
+        tester_email = "tester-test@tytalk.local"
+
+    monkeypatch.setattr(auth_module, "get_settings", lambda: On())
+    resp = client.post("/api/v1/auth/tester")
+    assert resp.status_code == 200
+    me = client.get("/api/v1/me", headers={"Authorization": f"Bearer {resp.json()['access_token']}"})
+    assert me.json()["email"] == "tester-test@tytalk.local"

@@ -1,0 +1,9 @@
+user_input,retrieved_contexts,response,reference,faithfulness
+Show me a picture of a cat.,['Fluffy Cat.jpg'],Here is a fluffy cat for you!,Describes the animal and an image of it is shown.,1.0
+Show me a photo of a red panda.,['Red Panda (6701512039).jpg'],"Here is a cute red panda for you, Sam!",Describes the animal and an image of it is shown.,1.0
+Can I see an image of a blue whale?,['Catoosa Blue Whale 2.jpg'],"Here is a picture of a blue whale for you, Sam!",Describes the animal and an image of it is shown.,0.5
+I want to see a picture of an elephant.,['Most Funny and Cute Baby Elephant Videos (Copyright Free) Full HD.webm'],"Here is a picture of a cute baby elephant for you, Sam!",Describes the animal and an image of it is shown.,0.5
+Show me what the Battle of Bach Dang looked like.,['The Battle for Iran - 2017 release.pdf'],Here is a scene from the Battle of Bach Dang.,Gives a short historical explanation and shows an image of the subject.,0.0
+Show me a picture of the Pyramids of Giza.,['All Gizah Pyramids.jpg'],"Here is a picture of the Pyramids of Giza for you, Sam.",Gives a short historical explanation and shows an image of the subject.,1.0
+Can you show me a photo of the Berlin Wall?,['West and East Germans at the Brandenburg Gate in 1989.jpg'],Here is a photo of the Berlin Wall for you.,Gives a short historical explanation and shows an image of the subject.,0.0
+Show me the Roman Colosseum in a picture.,"['A daytime view of Colosseum, Rome 5.jpg']","Here is a picture of the Roman Colosseum for you, Sam.",Gives a short historical explanation and shows an image of the subject.,1.0

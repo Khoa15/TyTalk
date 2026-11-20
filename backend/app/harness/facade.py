@@ -16,7 +16,7 @@ from app.harness.tts.tiny_voca import TinyVocaSynth
 from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
-REFUSAL_TEXT = "Mình chưa thể giúp việc này. Bạn thử hỏi theo cách khác nhé."
+REFUSAL_TEXT = "I can't help with that. Please try asking in a different way."
 OUTPUT_WINDOW = 300  # chars re-scanned by the output guard on every step
 
 
@@ -65,7 +65,7 @@ class Harness:
         if route == "plan":
             queries = await self._plan(message)
             image_map = await self._images.search_many(queries)
-            yield event("plan", {"steps": [f"Tìm ảnh: {q}" for q in queries]})
+            yield event("plan", {"steps": [f"Find image: {q}" for q in queries]})
 
         messages = build_messages(ctx.traits, message, recent, list(image_map), self._input_guard)
         builder = TimelineBuilder()

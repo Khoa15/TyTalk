@@ -20,8 +20,8 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
   return (
     <form className="talk-input" onSubmit={submit}>
       <input
-        aria-label="Tin nhắn"
-        placeholder="Nói gì đó với Orb…"
+        aria-label="Message"
+        placeholder="Say something to Orb…"
         maxLength={1000}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -31,8 +31,8 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
         type="button"
         className={`mic-btn${listening ? ' is-listening' : ''}`}
         aria-pressed={listening}
-        aria-label={listening ? 'Dừng ghi âm' : 'Nói với Orb bằng micro'}
-        title={listening ? 'Dừng ghi âm' : 'Nói bằng micro'}
+        aria-label={listening ? 'Stop recording' : 'Speak to Orb with the microphone'}
+        title={listening ? 'Stop recording' : 'Speak with the microphone'}
         onClick={onToggleMic}
         disabled={disabled && !listening}
       >
@@ -42,7 +42,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
         </svg>
       </button>
       <button type="submit" disabled={disabled || !value.trim()}>
-        Gửi
+        Send
       </button>
     </form>
   );
