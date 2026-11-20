@@ -1,0 +1,94 @@
+.landing, .auth-page, .talk-page { min-height: 100%; display: grid; place-items: center; padding: 16px; }
+.landing-hero { text-align: center; display: grid; gap: 12px; justify-items: center; max-width: 480px; }
+.landing-hero p { color: var(--dim); margin: 0; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.button-primary, .button-ghost, button {
+  padding: 10px 18px; border-radius: 999px; text-decoration: none; cursor: pointer;
+  border: 1px solid var(--glow); background: transparent;
+}
+.button-primary, button[type="submit"] { background: var(--glow); color: #fff; border-color: var(--glow); }
+button:disabled { opacity: 0.5; cursor: default; }
+.button-ghost { color: var(--fg); border-color: var(--line); }
+
+.auth-card {
+  width: min(380px, 100%); background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 24px; display: grid; gap: 14px;
+}
+.auth-card label { display: grid; gap: 6px; color: var(--dim); font-size: 14px; }
+.auth-card input, .talk-input input {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--fg);
+}
+.auth-card h1 { margin: 0; font-size: 22px; }
+.footer { color: var(--dim); font-size: 14px; margin: 0; }
+.error { color: var(--danger); margin: 0; font-size: 14px; }
+
+.talk-page { grid-template-rows: auto 1fr auto; align-content: stretch; gap: 12px; }
+.talk-top { display: flex; justify-content: flex-end; gap: 8px; width: 100%; }
+.chip { padding: 6px 12px; font-size: 13px; border-color: var(--line); color: var(--dim); }
+.stage { position: relative; display: grid; place-items: center; min-height: 360px; }
+.talk-dock { display: grid; gap: 8px; width: min(560px, 100%); justify-self: center; }
+.talk-input { display: flex; gap: 8px; width: 100%; align-items: center; }
+.talk-input input { flex: 1; min-width: 0; }
+
+.mic-btn {
+  flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center;
+  border-color: var(--line); color: var(--dim); background: var(--panel);
+}
+.mic-btn:not(:disabled):hover { color: var(--fg); border-color: var(--glow); }
+.mic-btn.is-listening {
+  color: #fff; background: var(--glow); border-color: var(--glow);
+  animation: mic-pulse 1.4s ease-out infinite;
+}
+@keyframes mic-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(138, 92, 255, 0.55); }
+  100% { box-shadow: 0 0 0 12px rgba(138, 92, 255, 0); }
+}
+
+/* Chat between Orb and microphone. */
+.chat-log {
+  height: clamp(140px, 26vh, 240px); overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 12px 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  scroll-behavior: smooth;
+}
+.chat-empty { margin: auto; color: var(--dim); font-size: 14px; text-align: center; }
+.bubble {
+  max-width: 78%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.45;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.bubble-orb {
+  align-self: flex-start; background: var(--bg); border: 1px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+.bubble-user {
+  align-self: flex-end; background: linear-gradient(135deg, var(--glow), var(--glow2));
+  color: #fff; border-bottom-right-radius: 4px;
+}
+.bubble-image { margin: 0; padding: 6px; max-width: 70%; }
+.bubble-image img { display: block; width: 100%; border-radius: 10px; }
+.bubble-image figcaption { color: var(--dim); font-size: 12px; margin-top: 6px; padding: 0 2px; }
+.bubble-live { opacity: 0.7; font-style: italic; }
+.typing { color: var(--dim); letter-spacing: 2px; }
+
+/* Scrollbar: thin, rounded, tinted with the Orb glow. */
+.chat-log { scrollbar-width: thin; scrollbar-color: var(--glow) transparent; }
+@supports selector(::-webkit-scrollbar) {
+  .chat-log { scrollbar-width: auto; }
+  .chat-log::-webkit-scrollbar { width: 8px; }
+  .chat-log::-webkit-scrollbar-track { background: transparent; margin: 10px 0; }
+  .chat-log::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--glow), var(--glow2));
+    border-radius: 999px; border: 2px solid var(--panel);
+  }
+  .chat-log::-webkit-scrollbar-thumb:hover { background: var(--glow); }
+  .chat-log::-webkit-scrollbar-corner { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-log { scroll-behavior: auto; }
+  .mic-btn.is-listening { animation: none; }
+}
+
+@media (max-width: 480px) {
+  .bubble { max-width: 88%; }
+}

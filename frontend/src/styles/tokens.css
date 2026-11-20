@@ -1,0 +1,27 @@
+/* Design tokens taken from orb-character.html. Dark-only, matching the character. */
+:root {
+  --bg: #07070c;
+  --panel: #0e0d16;
+  --line: #25233a;
+  --fg: #ecebf7;
+  --dim: #8c8aa6;
+  --glow: #8a5cff;
+  --glow2: #c0389a;
+  --danger: #ff5a4d;
+  --radius: 14px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--glow); }
+button, input {
+  font: inherit;
+  color: inherit;
+}
