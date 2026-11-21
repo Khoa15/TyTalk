@@ -1,7 +1,7 @@
 import asyncio
 
 from app.harness.composer import build_messages
-from app.harness.facade import NO_EVIDENCE_TEXT, Harness, UserContext, is_greeting
+from app.harness.facade import Harness, UserContext, is_greeting
 from app.harness.guardrails.chain import GuardChain
 from app.harness.rag.retriever import Evidence
 
@@ -44,12 +44,10 @@ def _harness(provider, retriever):
                    input_guard=GuardChain([]), output_guard=GuardChain([]), retriever=retriever)
 
 
-def test_no_evidence_refuses_without_calling_the_model():
+def test_no_evidence_still_reaches_the_model():
     provider = FakeProvider()
-    events = _run(_harness(provider, FakeRetriever([])), "What is the capital of Japan?")
-    assert provider.calls == 0
-    says = "".join(e["data"].get("delta", "") for e in events if e["event"] == "text")
-    assert says.strip() == NO_EVIDENCE_TEXT
+    _run(_harness(provider, FakeRetriever([])), "What is the capital of Japan?")
+    assert provider.calls == 1
 
 
 def test_evidence_is_passed_to_the_model_as_grounding():
@@ -76,3 +74,10 @@ def test_build_messages_adds_grounding_block_only_with_evidence():
     grounded = build_messages({}, "q", [], [], PassGuard(), ev)
     assert len(grounded) == len(plain) + 1
     assert "<evidence>" in grounded[1]["content"] and "(doc p.3)" in grounded[1]["content"]
+
+
+def test_small_talk_and_any_topic_reach_the_model():
+    provider = FakeProvider()
+    _run(_harness(provider, FakeRetriever([])), "I'm John. Who are you?")
+    _run(_harness(provider, FakeRetriever([])), "How do volcanoes form under the ocean?")
+    assert provider.calls == 2

@@ -20,7 +20,6 @@ from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
 REFUSAL_TEXT = "I can't help with that one. Let's explore science instead. Try one of these!"
-NO_EVIDENCE_TEXT = "Orb has not learned that yet. I know a lot about space and science, though. Try one of these!"
 # Tappable fallbacks when Orb refuses: always topics the corpus covers.
 TOPIC_SUGGESTIONS = ("Why is the Moon bright?", "What is a black hole?", "How hot is the Sun?")
 OUTPUT_WINDOW = 300  # chars re-scanned by the output guard on every step
@@ -74,16 +73,13 @@ class Harness:
         route = route_message(message)
         yield event("route", {"route": route})
 
+        # Orb is a companion for every topic except the sensitive ones the prompt blocks.
+        # The corpus only enriches answers when a passage matches; no match is never a refusal.
         evidence: list[Evidence] = []
         if self._retriever is not None and not is_greeting(message):
             # Follow-ups ("ok", "why") are retrieved with the topic they refer to, not on their own.
             query = contextual_query(message, recent)
             evidence = await run_in_threadpool(self._retriever.retrieve, query)
-            if not evidence:
-                # No passage supports an answer: refuse without calling the model.
-                for evt in self._refusal(TimelineBuilder(), NO_EVIDENCE_TEXT):
-                    yield evt
-                return
 
         image_map: dict[str, ImageResult] = {}
         queries: list[str] = []

@@ -21,7 +21,7 @@ from pathlib import Path
 
 from app.api.deps import get_harness
 from app.core.config import get_settings
-from app.harness.facade import NO_EVIDENCE_TEXT, UserContext, is_greeting
+from app.harness.facade import UserContext, is_greeting
 from app.harness.rag.retriever import default_retriever
 
 HERE = Path(__file__).resolve().parent
@@ -73,7 +73,7 @@ def run_harness(rows: list[dict]) -> list[dict]:
             "question": row["input"],
             "route": route,
             "answer": text,
-            "refused": is_refusal(text) or text == NO_EVIDENCE_TEXT,
+            "refused": is_refusal(text),
             "contexts": [c.text for c in contexts],
             "gold_hit": hit(row["gold"], contexts) if row["kind"] == "positive" else None,
         })
