@@ -9,7 +9,7 @@ from app.harness.states import (
     MAX_SIMS,
     MIN_SECONDS,
 )
-from app.harness.stream_parser import EntityTag, FormTag, ImageTag, Item, SimTag, StateTag, Text
+from app.harness.stream_parser import EntityTag, FormTag, ImageTag, Item, SimTag, StateTag, SuggestTag, Text
 from app.harness.tools.image_search import ImageResult
 
 
@@ -42,6 +42,7 @@ class TimelineBuilder:
         self._forms = 0
         self._entities = 0
         self._sims = 0
+        self._suggested = False
         self._visual_end_ms = 0  # forms, entities and sims run beside the speech; they never move the cursor
 
     def say(self, text: str, duration_ms: int, wav_base64: str | None = None) -> list[dict[str, Any]]:
@@ -92,7 +93,16 @@ class TimelineBuilder:
             return self._entity(item)
         if isinstance(item, SimTag):
             return self._sim(item)
+        if isinstance(item, SuggestTag):
+            return self._suggest(item)
         return []
+
+    def _suggest(self, tag: SuggestTag) -> list[dict[str, Any]]:
+        # Untimed: suggestions are tap targets, not part of the spoken schedule.
+        if self._suggested:
+            return []
+        self._suggested = True
+        return [event("suggest", {"items": list(tag.items)})]
 
     def done(self) -> dict[str, Any]:
         # The reply lasts until the last segment OR the last image has finished.

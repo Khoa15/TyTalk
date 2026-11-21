@@ -26,11 +26,14 @@ def build_messages(
     image_queries: list[str],
     input_guard: GuardChain,
     evidence: "list[Evidence] | None" = None,
+    hints: list[str] | None = None,
 ) -> list[dict[str, str]]:
     """Assemble the chat request. Recent user turns pass the input guard again."""
     messages = [{"role": "system", "content": build_system_prompt(traits, image_queries)}]
     if evidence:
         messages.append({"role": "system", "content": evidence_block(evidence)})
+    if hints:
+        messages.append({"role": "system", "content": "TURN HINTS (server instructions):\n- " + "\n- ".join(hints)})
     for turn in recent[-6:]:
         if turn.role == "user" and not input_guard.check(turn.text).ok:
             continue

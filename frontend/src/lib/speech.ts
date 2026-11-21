@@ -17,8 +17,8 @@ export interface SpeechRecognizer {
 
 type SpeechCtor = new () => SpeechRecognizer;
 
-/** Returns a recognizer for Vietnamese speech, or null when the browser has no Web Speech support. */
-export function createSpeechRecognizer(lang = 'vi-VN'): SpeechRecognizer | null {
+/** Returns a recognizer for English speech (the project is English-only), or null when the browser has no Web Speech support. */
+export function createSpeechRecognizer(lang = 'en-US'): SpeechRecognizer | null {
   if (typeof window === 'undefined') return null;
   const w = window as unknown as { SpeechRecognition?: SpeechCtor; webkitSpeechRecognition?: SpeechCtor };
   const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;

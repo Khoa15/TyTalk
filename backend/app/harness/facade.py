@@ -7,19 +7,22 @@ from typing import Any
 from starlette.concurrency import run_in_threadpool
 
 from app.harness.composer import build_messages
+from app.harness.followup import contextual_query, turn_hints
 from app.harness.guardrails.chain import GuardChain
 from app.harness.planner import PLANNER_PROMPT, parse_plan
 from app.harness.providers.base import LLMProvider, ProviderError, collect
 from app.harness.rag.retriever import CorpusRetriever, Evidence
 from app.harness.router import route_message
-from app.harness.stream_parser import Item, StateTag, StreamParser, Text
+from app.harness.stream_parser import Item, StateTag, StreamParser, SuggestTag, Text
 from app.harness.timeline import TimelineBuilder, estimate_speech_ms, event
 from app.harness.tts.tiny_voca import TinyVocaSynth
 from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
-REFUSAL_TEXT = "I can't help with that. Please try asking in a different way."
-NO_EVIDENCE_TEXT = "Hmm, Orb is not sure about that yet. Want to ask me a different science question?"
+REFUSAL_TEXT = "I can't help with that. I only answer science and learning questions. Try one of these!"
+NO_EVIDENCE_TEXT = "Orb has not learned that yet. I know a lot about space and science, though. Try one of these!"
+# Tappable fallbacks when Orb refuses: always topics the corpus covers.
+TOPIC_SUGGESTIONS = ("Why is the Moon bright?", "What is a black hole?", "How hot is the Sun?")
 OUTPUT_WINDOW = 300  # chars re-scanned by the output guard on every step
 _GREETING = re.compile(r"^\s*(hi+|hello|hey|yo|good (morning|afternoon|evening|night))\b", re.IGNORECASE)
 
@@ -73,7 +76,9 @@ class Harness:
 
         evidence: list[Evidence] = []
         if self._retriever is not None and not is_greeting(message):
-            evidence = await run_in_threadpool(self._retriever.retrieve, message)
+            # Follow-ups ("ok", "why") are retrieved with the topic they refer to, not on their own.
+            query = contextual_query(message, recent)
+            evidence = await run_in_threadpool(self._retriever.retrieve, query)
             if not evidence:
                 # No passage supports an answer: refuse without calling the model.
                 for evt in self._refusal(TimelineBuilder(), NO_EVIDENCE_TEXT):
@@ -88,7 +93,13 @@ class Harness:
             yield event("plan", {"steps": [f"Find image: {q}" for q in queries]})
 
         messages = build_messages(
-            ctx.traits, message, recent, list(image_map), self._input_guard, evidence or None
+            ctx.traits,
+            message,
+            recent,
+            list(image_map),
+            self._input_guard,
+            evidence or None,
+            turn_hints(message, recent),
         )
         builder = TimelineBuilder()
         spoken = ""
@@ -148,5 +159,6 @@ class Harness:
     def _refusal(builder: TimelineBuilder, text: str = REFUSAL_TEXT) -> list[dict[str, Any]]:
         events = builder.apply(StateTag("surprised", 2.0), {})
         events += builder.say(text, estimate_speech_ms(text))
+        events += builder.apply(SuggestTag(TOPIC_SUGGESTIONS), {})
         events.append(builder.done())
         return events

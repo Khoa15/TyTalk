@@ -46,6 +46,8 @@ interface TalkState {
   /** The simulation on stage, if any. */
   sim: { evt: SimEvt; startedAt: number } | null;
   image: ImageEvt | null;
+  /** Tappable follow-up questions for the child, from the server's suggest event. */
+  suggestions: string[];
   busy: boolean;
   error: string | null;
   speakEnabled: boolean;
@@ -71,6 +73,7 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
   entities: [],
   sim: null,
   image: null,
+  suggestions: [],
   busy: false,
   error: null,
   speakEnabled: true,
@@ -134,6 +137,7 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       reply: '',
       orbState: 'working',
       image: null,
+      suggestions: [],
       lines: [
         ...get().lines,
         { id: orbLineId - 1, role: 'user', text: message },
@@ -214,6 +218,11 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
             reply: replyText,
             lines: get().lines.map((l) => (l.id === orbLineId ? { ...l, text: replyText } : l)),
           });
+          break;
+        }
+        case 'suggest': {
+          const items = Array.isArray(data.items) ? data.items.map(String).slice(0, 3) : [];
+          set({ suggestions: items });
           break;
         }
         case 'done':

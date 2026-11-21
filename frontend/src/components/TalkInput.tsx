@@ -12,7 +12,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!value.trim()) return;
+    if (!value.trim() || disabled) return;
     onSend(value);
     setValue('');
   };
@@ -25,7 +25,6 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
         maxLength={1000}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        disabled={disabled}
       />
       <button
         type="button"
@@ -42,7 +41,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
         </svg>
       </button>
       <button type="submit" disabled={disabled || !value.trim()}>
-        Send
+        {disabled ? 'Orb is thinking…' : 'Send'}
       </button>
     </form>
   );

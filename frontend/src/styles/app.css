@@ -36,6 +36,12 @@ button:disabled { opacity: 0.5; cursor: default; }
 .talk-dock { display: grid; gap: 8px; width: min(560px, 100%); justify-self: center; }
 .talk-input { display: flex; gap: 8px; width: 100%; align-items: center; }
 .talk-input input { flex: 1; min-width: 0; }
+.suggest-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.suggest-chip {
+  padding: 8px 14px; font-size: 15px; border-radius: 999px; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--glow); color: var(--fg);
+}
+.suggest-chip:hover, .suggest-chip:focus-visible { background: var(--glow); color: #fff; }
 
 .mic-btn {
   flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center;
@@ -53,13 +59,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 /* Chat between Orb and microphone. */
 .chat-log {
-  height: clamp(140px, 26vh, 240px); overflow-y: auto; overscroll-behavior: contain;
+  height: clamp(160px, 32vh, 280px); overflow-y: auto; overscroll-behavior: contain;
   display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 12px 12px;
   background: transparent; border: none; border-radius: var(--radius);
   scroll-behavior: smooth;
 }
 .bubble {
-  max-width: 78%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.45;
+  max-width: 78%; padding: 8px 12px; border-radius: 14px; font-size: 18px; line-height: 1.45;
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .bubble-orb {
@@ -101,7 +107,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--fg); background: var(--panel); border: 1px solid var(--line);
 }
 .bubble-live { opacity: 0.7; font-style: italic; }
-.typing { color: var(--dim); letter-spacing: 2px; }
+.typing { color: var(--dim); font-style: italic; }
 
 /* Scrollbar: thin, rounded, tinted with the Orb glow. */
 .chat-log { scrollbar-width: thin; scrollbar-color: var(--glow) transparent; }

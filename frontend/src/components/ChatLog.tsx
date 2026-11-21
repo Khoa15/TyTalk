@@ -48,7 +48,7 @@ export function ChatLog({ lines, busy, listening, interim }: Props) {
             </figure>
           ) : (
             <div key={line.id} className={`bubble bubble-${line.role}`}>
-              {line.text || (busy && line.role === 'orb' ? <span className="typing">…</span> : null)}
+              {line.text || (busy && line.role === 'orb' ? <span className="typing">Orb is thinking…</span> : null)}
             </div>
           )
         ))}

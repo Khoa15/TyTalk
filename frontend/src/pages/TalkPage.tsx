@@ -18,6 +18,7 @@ export function TalkPage() {
   const speakEnabled = useTalkStore((s) => s.speakEnabled);
   const lines = useTalkStore((s) => s.lines);
   const interim = useTalkStore((s) => s.interim);
+  const suggestions = useTalkStore((s) => s.suggestions);
   const listening = useTalkStore((s) => s.listening);
   const send = useTalkStore((s) => s.send);
   const toggleSpeak = useTalkStore((s) => s.toggleSpeak);
@@ -62,6 +63,15 @@ export function TalkPage() {
       <div className="talk-dock">
         <ChatLog lines={lines} busy={busy} listening={listening} interim={interim} />
         {error && <p role="alert" className="error">{error}</p>}
+        {suggestions.length > 0 && !busy && (
+          <div className="suggest-row" role="group" aria-label="Ideas to ask next">
+            {suggestions.map((text) => (
+              <button key={text} type="button" className="suggest-chip" onClick={() => void send(text)}>
+                {text}
+              </button>
+            ))}
+          </div>
+        )}
         <TalkInput
           disabled={busy}
           listening={listening}
