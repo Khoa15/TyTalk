@@ -160,4 +160,4 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .space-sim p { margin: 0; color: #e9e4ff; font-size: 14px; font-weight: 700; text-transform: capitalize; text-align: center; }
 /* While a sim plays, the orb steps aside to the left and shrinks; the sim canvas takes the centre. */
-body.space-sim-on .orb-layer { translate: -120px 0; scale: 0.72; transition: translate 0.45s ease, scale 0.45s ease; }
+body.space-sim-on .orb-layer, body.space-entities-on .orb-layer { translate: -120px 0; scale: 0.72; transition: translate 0.45s ease, scale 0.45s ease; }

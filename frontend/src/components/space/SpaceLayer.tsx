@@ -20,6 +20,8 @@ const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const simWidth = () => Math.min(400, window.innerWidth - 40);
 /** The canvas centre sits to the right of the orb's stage centre, so the orb (moved left) is never covered. */
 const simShift = () => simWidth() * 0.5 - 10;
+/** Sim centre x, kept inside the viewport so the canvas is never cut off at the edge. */
+const simCentreX = (orbCx: number) => Math.min(orbCx + simShift(), window.innerWidth - simWidth() / 2 - 12);
 
 /**
  * Cartoon entities and the current simulation, drawn where the Orb is (no modal).
@@ -36,6 +38,12 @@ export function SpaceLayer({ entities, sim, anchorRef }: Props) {
     document.body.classList.toggle('space-sim-on', sim !== null);
     return () => document.body.classList.remove('space-sim-on');
   }, [sim]);
+
+  // Entities get the same stage as a sim: the orb steps left and the art sits on the right.
+  useEffect(() => {
+    document.body.classList.toggle('space-entities-on', entities.length > 0);
+    return () => document.body.classList.remove('space-entities-on');
+  }, [entities.length]);
 
   useEffect(() => {
     if (!active) return;
@@ -59,13 +67,13 @@ export function SpaceLayer({ entities, sim, anchorRef }: Props) {
   return createPortal(
     <>
       {entities.length > 0 && (
-        // Confined to the stage rectangle (never over the chat) and drawn under the orb (never over the orb).
+        // Same square box as the sim, on the right of the orb: the orb steps left, so nothing covers it.
         <svg
           className="space-entities"
-          viewBox={`0 ${50 - (50 * box.height) / box.width} 100 ${(100 * box.height) / box.width}`}
+          viewBox="0 0 100 100"
           preserveAspectRatio="xMidYMid meet"
           aria-hidden="true"
-          style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
+          style={{ left: simCentreX(box.cx) - simWidth() / 2, top: box.cy - simWidth() / 2, width: simWidth(), height: simWidth() }}
         >
           {entities.flatMap(({ evt, startedAt }) => {
             const copies = evt.kind === 'comet' ? 1 : evt.count;
@@ -78,7 +86,7 @@ export function SpaceLayer({ entities, sim, anchorRef }: Props) {
       {sim && (() => {
         const p = clamp01((now - sim.startedAt) / sim.evt.duration_ms);
         return (
-          <div className="space-sim" role="img" aria-label={simCaption(sim.evt, p)} style={{ left: box.cx + simShift(), top: box.cy, width: simWidth() }}>
+          <div className="space-sim" role="img" aria-label={simCaption(sim.evt, p)} style={{ left: simCentreX(box.cx), top: box.cy, width: simWidth() }}>
             <svg viewBox="0 0 200 200">
               <SimScene evt={sim.evt} p={p} t={(now - sim.startedAt) / 1000} />
             </svg>
