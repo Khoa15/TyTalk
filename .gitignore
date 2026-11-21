@@ -9,6 +9,7 @@ node_modules/
 frontend/dist/
 logs/
 /models/
+!backend/models/
 
 # OS / tool artifacts
 .DS_Store

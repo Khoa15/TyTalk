@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -43,7 +44,8 @@ class Settings(BaseSettings):
     # Wikimedia returns thumbnails on thumb.wikimedia.org, originals on upload.wikimedia.org.
     # Local TTS (tiny-voca, ONNX, CPU). Missing model files disable TTS; text still streams.
     tts_enabled: bool = True
-    tts_model_dir: str = "/app/models/tiny-voca"
+    # Bundled with the backend (backend/models/tiny-voca). Docker compose overrides this to /app/models/tiny-voca.
+    tts_model_dir: str = str(Path(__file__).resolve().parents[2] / "models" / "tiny-voca")
 
     image_domain_allowlist: list[str] = ["upload.wikimedia.org", "thumb.wikimedia.org"]
 
