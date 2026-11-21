@@ -41,7 +41,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
         </svg>
       </button>
       <button type="submit" disabled={disabled || !value.trim()}>
-        {disabled ? 'Orb is thinking…' : 'Send'}
+        Send
       </button>
     </form>
   );

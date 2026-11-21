@@ -103,6 +103,7 @@ def test_prompt_makes_orb_playful_and_announces_form_changes():
     prompt = build_system_prompt({}, [])
     assert "silly, bouncy, giggly friend" in prompt
     assert "FORM CHANGES" in prompt
-    assert "Hey hey, look, look!" in prompt
-    assert "Ta-da! I'm Orb again" in prompt
+    assert "Now I'm a big shiny sun" in prompt
+    assert "AFTER the answer and never instead of it" in prompt
+    assert "Ta-da" not in prompt.split("FORM CHANGES")[1].split("STORY GUIDE")[0]
     assert "Never sarcastic, never mean, never scary" in prompt

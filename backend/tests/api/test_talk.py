@@ -34,7 +34,7 @@ def test_injection_is_refused_as_stream_without_calling_llm(client):
     assert resp.status_code == 200
     assert resp.headers["content-type"].startswith("text/event-stream")
     events = _parse_events(resp.text)
-    assert events == ["segment", "text", "done"]
+    assert events == ["segment", "text", "suggest", "done"]
     assert "event: route" not in resp.text
 
 
@@ -68,7 +68,7 @@ def test_empty_llm_reply_is_reported_as_error_not_success(monkeypatch):
 
     async def collect_events():
         ctx = UserContext(user_id=1, traits={})
-        return [e["event"] async for e in harness.respond(ctx, "xin chào", [])]
+        return [e["event"] async for e in harness.respond(ctx, "hello", [])]
 
     events = asyncio.run(collect_events())
     assert events[-1] == "error"

@@ -22,6 +22,9 @@ class FakeRetriever:
     def retrieve(self, query):
         return self._evidence
 
+    def is_covered(self, query):
+        return True
+
 
 class PassGuard:
     def check(self, text):

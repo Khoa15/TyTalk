@@ -106,6 +106,10 @@ class CorpusRetriever:
         vec /= max(float(np.linalg.norm(vec)), 1e-12)
         return float(np.max(self._unit @ vec))
 
+    def is_covered(self, query: str) -> bool:
+        """True when the corpus can plausibly answer this query (same gate as retrieve)."""
+        return self.top_similarity(query) >= self._settings.rag_min_score
+
     def retrieve(self, query: str) -> list[Evidence]:
         if not query.strip():
             return []

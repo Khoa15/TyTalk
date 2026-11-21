@@ -19,7 +19,7 @@ from app.harness.tts.tiny_voca import TinyVocaSynth
 from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
-REFUSAL_TEXT = "I can't help with that. I only answer science and learning questions. Try one of these!"
+REFUSAL_TEXT = "I can't help with that one. Let's explore science instead. Try one of these!"
 NO_EVIDENCE_TEXT = "Orb has not learned that yet. I know a lot about space and science, though. Try one of these!"
 # Tappable fallbacks when Orb refuses: always topics the corpus covers.
 TOPIC_SUGGESTIONS = ("Why is the Moon bright?", "What is a black hole?", "How hot is the Sun?")
@@ -99,7 +99,7 @@ class Harness:
             list(image_map),
             self._input_guard,
             evidence or None,
-            turn_hints(message, recent),
+            turn_hints(message, recent, self._input_guard),
         )
         builder = TimelineBuilder()
         spoken = ""
@@ -115,6 +115,9 @@ class Harness:
                     for evt in builder.say(item.text, duration_ms, wav_b64):
                         yield evt
                     continue
+                if isinstance(item, SuggestTag):
+                    # Never offer a tap target the corpus cannot answer.
+                    item = SuggestTag(await self._grounded(item.items) or TOPIC_SUGGESTIONS)
                 for evt in builder.apply(item, image_map):
                     yield evt
         except ProviderError:
@@ -126,6 +129,16 @@ class Harness:
             yield event("error", {"code": "empty_reply"})
             return
         yield builder.done()
+
+    async def _grounded(self, items: tuple[str, ...]) -> tuple[str, ...]:
+        """Keep only suggestions the corpus can answer. Without a retriever nothing is filtered."""
+        if self._retriever is None:
+            return items
+        keep = []
+        for item in items:
+            if await run_in_threadpool(self._retriever.is_covered, item):
+                keep.append(item)
+        return tuple(keep)
 
     async def _tokens(self, messages: list[dict[str, str]]) -> AsyncIterator[Item]:
         parser = StreamParser()
