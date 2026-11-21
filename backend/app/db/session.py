@@ -5,7 +5,13 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
 
-engine = create_engine(get_settings().database_url, pool_pre_ping=True)
+def connect_args_for(url: str) -> dict:
+    # Supabase's transaction pooler (port 6543) cannot reuse server-side prepared statements.
+    return {"prepare_threshold": None} if url.startswith("postgresql") else {}
+
+
+_url = get_settings().database_url
+engine = create_engine(_url, pool_pre_ping=True, connect_args=connect_args_for(_url))
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
