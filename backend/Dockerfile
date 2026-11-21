@@ -5,12 +5,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
-COPY app ./app
-RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir ".[tts]" \
-    && pip install --no-cache-dir "git+https://github.com/n4ze3m/dizione"
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
+COPY app ./app
+COPY dizione ./dizione
 COPY tests ./tests
 
 EXPOSE 8000
