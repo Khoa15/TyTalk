@@ -83,7 +83,10 @@ def get_harness() -> Harness:
     tts = None
     model_file = Path(settings.tts_model_dir) / "onnx" / "model.onnx"
     if settings.tts_enabled and model_file.exists():
-        tts = TinyVocaSynth(settings.tts_model_dir)
+        try:
+            tts = TinyVocaSynth(settings.tts_model_dir)
+        except Exception as exc:  # noqa: BLE001  (voice is optional: text must still stream)
+            print(f"TTS disabled: {type(exc).__name__}: {exc}", flush=True)
     retriever = default_retriever() if settings.rag_enabled else None
     return Harness(
         provider=provider,

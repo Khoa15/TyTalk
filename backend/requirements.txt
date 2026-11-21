@@ -95,3 +95,4 @@ win32-setctime==1.2.1 ; sys_platform == 'win32'
 xxhash==4.1.0
 yarl==1.25.1
 zstandard==0.25.0
+dizione @ git+https://github.com/n4ze3m/dizione@8cd889e4de7be6bd1dd2e6891344a0729fa14dd4
