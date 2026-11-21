@@ -1,4 +1,5 @@
 from functools import lru_cache
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,7 +13,9 @@ class Settings(BaseSettings):
     # Dev-only: log full request/response bodies (see app/core/http_log.py).
     http_body_log: bool = False
     # PostgreSQL via psycopg 3. Supabase: postgresql+psycopg://... (see backend/.env.example).
-    database_url: str = "postgresql+psycopg://tytalk:tytalk@postgres:5432/tytalk"
+    # Empty means: use POSTGRES_URL (set by the Vercel Supabase/Postgres storage), else the local default.
+    database_url: str = ""
+    postgres_url: str = ""
     # Apply Alembic migrations when the app starts. Needed on Vercel, where no CMD runs alembic.
     run_migrations_on_start: bool = False
 
@@ -63,6 +66,28 @@ class Settings(BaseSettings):
     rag_min_score: float = 0.35
 
 
+_LOCAL_DATABASE_URL = "postgresql+psycopg://tytalk:tytalk@postgres:5432/tytalk"
+# Query params that come from Vercel/Supabase tooling and are not libpq options.
+_NON_LIBPQ_PARAMS = {"supa", "pgbouncer"}
+
+
+def normalize_database_url(url: str) -> str:
+    """Turn a postgres:// URL (as Vercel/Supabase provide it) into SQLAlchemy's postgresql+psycopg:// form."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            url = "postgresql+psycopg://" + url[len(prefix):]
+            break
+    parts = urlsplit(url)
+    if not parts.scheme.startswith("postgresql"):
+        return url
+    query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if k not in _NON_LIBPQ_PARAMS]
+    return urlunsplit(parts._replace(query=urlencode(query)))
+
+
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    settings = Settings()
+    settings.database_url = normalize_database_url(
+        settings.database_url or settings.postgres_url or _LOCAL_DATABASE_URL
+    )
+    return settings
