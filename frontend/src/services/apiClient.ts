@@ -1,5 +1,8 @@
 // The only place that knows the API version prefix.
-export const API_BASE = '/api/v1';
+// VITE_API_BASE is the backend origin in production (e.g. https://tytalk-api.vercel.app).
+// Empty in dev: requests stay relative and Vite's /api proxy forwards them.
+const ORIGIN = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').replace(/\/+$/, '');
+export const API_BASE = `${ORIGIN}/api/v1`;
 
 export class ApiError extends Error {
   constructor(
