@@ -26,7 +26,7 @@ def test_system_prompt_does_not_reask_after_user_chooses_any():
     prompt = build_system_prompt({}, [])
     assert "Never ask a clarifying question twice" in prompt
     assert '"any"' in prompt
-    assert "pick ONE concrete space item yourself" in prompt
+    assert "pick ONE concrete topic yourself" in prompt
 
 
 def test_system_prompt_delivers_requested_story_before_options():
@@ -59,12 +59,14 @@ def test_parse_plan_rejects_malformed_output():
     assert parse_plan('{"image_queries": [1, 2]}') == []
 
 
-def test_system_prompt_is_science_scoped_for_children():
+def test_system_prompt_is_open_topic_but_child_safe():
     from app.harness.prompts import build_system_prompt
 
     prompt = build_system_prompt({}, [])
-    assert "ONLY questions in science, logic and academic learning" in prompt
-    assert "OUT OF SCOPE" in prompt
+    assert "any topic a child is curious about" in prompt
+    assert "SENSITIVE TOPICS" in prompt
+    assert "war and fighting" in prompt
+    assert "Never mention or list these topics to the child" in prompt
     assert "children aged 5 to 15" in prompt
     assert "simple words and short sentences" in prompt
     assert "Never ask the child for personal information" in prompt
@@ -79,9 +81,8 @@ def test_system_prompt_states_answer_structure_and_suggest_rule():
     assert "also ends with one" in prompt
 
 
-def test_planner_prompt_targets_science_and_child_safe_images():
+def test_planner_prompt_targets_child_safe_images():
     from app.harness.planner import PLANNER_PROMPT
 
-    assert "science topic" in PLANNER_PROMPT
     assert "child-friendly" in PLANNER_PROMPT
-    assert "outside science and learning" in PLANNER_PROMPT
+    assert "violent, political, religious" in PLANNER_PROMPT
