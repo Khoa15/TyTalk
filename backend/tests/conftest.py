@@ -2,7 +2,7 @@ import os
 import uuid
 
 # Must run before `app` is imported: settings are read at import time.
-os.environ["DATABASE_URL"] = "sqlite:///./.test.db"
+os.environ["SUPABASE_URL"] = ""  # no network in tests: the in-memory store is injected below
 os.environ["JWT_SECRET"] = "test-secret-test-secret-test-secret-123456"
 os.environ["AUTH_RATE_LIMIT_PER_MINUTE"] = "1000"
 os.environ["TALK_RATE_LIMIT_PER_MINUTE"] = "1000"
@@ -11,19 +11,16 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.api.deps import auth_limiter, talk_limiter  # noqa: E402
-from app.db.base import Base  # noqa: E402
-from app.db.session import engine  # noqa: E402
 from app.main import app  # noqa: E402
-import app.models as _registered_models  # noqa: E402,F401  (registers tables on Base.metadata)
+from app.repositories.store import set_store  # noqa: E402
+from fake_store import MemoryStore  # noqa: E402
 
 
-@pytest.fixture(scope="session", autouse=True)
-def _schema():
-    Base.metadata.create_all(engine)
+@pytest.fixture(autouse=True)
+def _fresh_store():
+    set_store(MemoryStore())
     yield
-    engine.dispose()
-    if os.path.exists(".test.db"):
-        os.remove(".test.db")
+    set_store(None)
 
 
 @pytest.fixture(autouse=True)

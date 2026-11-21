@@ -1,21 +1,15 @@
-from sqlalchemy.orm import Session
+from typing import Any
 
-from app.models.persona import UserPersona
+from app.core.clock import utc_now
+from app.repositories.store import get_store
 
 
 class PersonaRepository:
-    def __init__(self, db: Session) -> None:
-        self._db = db
-
-    def get_traits(self, user_id: int) -> dict:
-        row = self._db.get(UserPersona, user_id)
+    def get_traits(self, user_id: int) -> dict[str, Any]:
+        row = get_store().get_persona(user_id)
         return dict(row.traits) if row else {}
 
-    def save_traits(self, user_id: int, traits: dict) -> None:
-        row = self._db.get(UserPersona, user_id)
-        if row is None:
-            self._db.add(UserPersona(user_id=user_id, traits=traits, version=1))
-        else:
-            row.traits = traits
-            row.version += 1
-        self._db.flush()
+    def save_traits(self, user_id: int, traits: dict[str, Any]) -> None:
+        row = get_store().get_persona(user_id)
+        version = row.version + 1 if row else 1
+        get_store().upsert_persona(user_id, traits, version, utc_now())

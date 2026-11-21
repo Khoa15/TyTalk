@@ -6,17 +6,13 @@ from app.api.v1.router import api_v1
 from app.core.config import get_settings
 from app.core.http_log import HttpBodyLogMiddleware
 from app.core.errors import AppError
-from app.db.migrate import run_migrations
-from app.db.session import check_database_connection
-from app.models import User  # noqa: F401  (registers models for the app)
+from app.db.supabase_client import check_database_connection
 
 API_VERSION = "1"
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    if settings.run_migrations_on_start:
-        run_migrations()
     check_database_connection()
     app = FastAPI(
         title="TyTalk API",

@@ -4,18 +4,15 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.api.deps import CurrentUser, get_harness, limit_by_ip, talk_limiter
-from app.db.session import get_db
 from app.harness.facade import Harness, UserContext
 from app.schemas.talk import TalkRequest
 from app.services.persona_service import PersonaService, schedule_persona_learning
 
 router = APIRouter(tags=["talk"])
 
-DbSession = Annotated[Session, Depends(get_db)]
 IpTalkLimit = Depends(limit_by_ip(talk_limiter))
 
 SSE_DESCRIPTION = (
@@ -46,10 +43,9 @@ def sse_encode(evt: dict[str, Any]) -> str:
 async def talk(
     body: TalkRequest,
     user: CurrentUser,
-    db: DbSession,
     harness: Annotated[Harness, Depends(get_harness)],
 ) -> StreamingResponse:
-    traits = await run_in_threadpool(PersonaService(db).traits, user.id)
+    traits = await run_in_threadpool(PersonaService().traits, user.id)
     ctx = UserContext(user_id=user.id, traits=traits)
 
     async def events() -> AsyncIterator[str]:

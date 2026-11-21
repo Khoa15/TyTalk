@@ -6,13 +6,11 @@ from typing import Annotated
 import jwt
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.ratelimit import RateLimiter
 from app.core.security import decode_access_token
-from app.db.session import get_db
 from app.harness.facade import Harness
 from app.harness.guardrails.input_guards import build_input_chain
 from app.harness.guardrails.output_guards import build_output_chain
@@ -22,7 +20,7 @@ from app.harness.rag.retriever import default_retriever
 from app.harness.providers.logged import LoggedProvider
 from app.harness.tools.image_search import ImageSearchTool
 from app.harness.tts.tiny_voca import TinyVocaSynth
-from app.models.user import User
+from app.repositories.store import UserRecord
 from app.repositories.user_repo import UserRepository
 
 _bearer = HTTPBearer(auto_error=False)
@@ -34,21 +32,20 @@ talk_limiter = RateLimiter(_settings.talk_rate_limit_per_minute, per_seconds=60)
 
 def get_current_user(
     creds: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
-    db: Annotated[Session, Depends(get_db)],
-) -> User:
+) -> UserRecord:
     if creds is None:
         raise AppError(401, "unauthorized", "Missing access token")
     try:
         user_id = decode_access_token(creds.credentials)
     except jwt.PyJWTError as exc:
         raise AppError(401, "unauthorized", "Invalid access token") from exc
-    user = UserRepository(db).get_by_id(user_id)
+    user = UserRepository().get_by_id(user_id)
     if user is None:
         raise AppError(401, "unauthorized", "User does not exist")
     return user
 
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUser = Annotated[UserRecord, Depends(get_current_user)]
 
 
 def _enforce(limiter: RateLimiter, key: str) -> None:

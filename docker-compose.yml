@@ -1,37 +1,17 @@
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: tytalk
-      POSTGRES_USER: tytalk
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tytalk}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tytalk -d tytalk"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-
   api:
     build: ./backend
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg://tytalk:${POSTGRES_PASSWORD:-tytalk}@postgres:5432/tytalk
       HTTP_BODY_LOG: "true"
       TESTER_LOGIN_ENABLED: "true"
     ports:
       - "8000:8000"
-    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log 2>&1 | tee -a /app/logs/api.log"
+    command: sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log 2>&1 | tee -a /app/logs/api.log"
     volumes:
       - ./logs:/app/logs
       - ./models:/app/models:ro
       - ./backend/data:/app/data:ro
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')"]
       interval: 10s
@@ -52,6 +32,3 @@ services:
     depends_on:
       api:
         condition: service_healthy
-
-volumes:
-  postgres_data:

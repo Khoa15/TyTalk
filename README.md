@@ -71,7 +71,7 @@ Requirements: Docker, Python 3.13 and Node.js.
 
    Set `JWT_SECRET` and `LLM_API_KEY`. Never commit `.env`.
 
-2. Start the PostgreSQL database:
+2. Create the tables once: run `supabase/schema.sql` in your Supabase SQL editor, and set `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env`. Then start the stack:
 
    ```bash
    docker compose up -d
@@ -83,7 +83,7 @@ Requirements: Docker, Python 3.13 and Node.js.
 
 ## Tech stack
 
-- **Backend**: FastAPI, Python 3.13, PostgreSQL 16 (or Supabase), JWT authentication.
+- **Backend**: FastAPI, Python 3.13, Supabase (Postgres), JWT authentication.
 - **Frontend**: React, Vite, TypeScript.
 - **AI**: works with any OpenAI-compatible endpoint (OpenRouter, OpenAI, DeepSeek, Gemini, Qwen, Anthropic Claude and more). Switching is a configuration change.
 - **Deployment**: Docker Compose.

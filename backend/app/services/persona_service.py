@@ -1,10 +1,8 @@
 import asyncio
 from typing import Any
 
-from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from app.db.session import SessionLocal
 from app.harness.persona_updater import extract_traits
 from app.harness.providers.base import LLMProvider
 from app.repositories.persona_repo import PersonaRepository
@@ -39,9 +37,8 @@ def merge_traits(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
 
 
 class PersonaService:
-    def __init__(self, db: Session) -> None:
-        self._db = db
-        self._repo = PersonaRepository(db)
+    def __init__(self) -> None:
+        self._repo = PersonaRepository()
 
     def traits(self, user_id: int) -> dict[str, Any]:
         return self._repo.get_traits(user_id)
@@ -49,18 +46,16 @@ class PersonaService:
     def learn(self, user_id: int, extracted: dict[str, Any]) -> None:
         merged = merge_traits(self._repo.get_traits(user_id), sanitize_traits(extracted))
         self._repo.save_traits(user_id, merged)
-        self._db.commit()
 
     def reset(self, user_id: int) -> None:
         self._repo.save_traits(user_id, {})
-        self._db.commit()
 
 
 _background_tasks: set[asyncio.Task[None]] = set()
 
 
 def schedule_persona_learning(user_id: int, message: str, provider: LLMProvider) -> None:
-    """Fire-and-forget: runs after the reply starts streaming, uses its own DB session.
+    """Fire-and-forget: runs after the reply starts streaming.
 
     Only the user's message is sent for extraction and only derived traits are saved.
     """
@@ -70,11 +65,7 @@ def schedule_persona_learning(user_id: int, message: str, provider: LLMProvider)
         if not extracted:
             return
 
-        def _save() -> None:
-            with SessionLocal() as db:
-                PersonaService(db).learn(user_id, extracted)
-
-        await run_in_threadpool(_save)
+        await run_in_threadpool(PersonaService().learn, user_id, extracted)
 
     task = asyncio.create_task(_run())
     _background_tasks.add(task)
