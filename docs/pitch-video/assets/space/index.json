@@ -1,0 +1,43 @@
+{
+  "count": 24,
+  "files": [
+    "form-sun",
+    "form-earth",
+    "form-moon",
+    "form-galaxy",
+    "form-blackhole",
+    "entity-comet",
+    "entity-meteor",
+    "entity-asteroid",
+    "entity-rocket",
+    "entity-astronaut",
+    "entity-satellite",
+    "entity-probe",
+    "sim-moon_phases",
+    "sim-solar_eclipse",
+    "sim-lunar_eclipse",
+    "sim-solar_system",
+    "sim-day_night",
+    "sim-seasons",
+    "sim-launch",
+    "sim-gravity",
+    "sim-tides",
+    "sim-aurora",
+    "sim-blackhole_lens",
+    "sim-star_life"
+  ],
+  "sims": {
+    "moon_phases": "The Moon orbits the Earth: the half facing the Sun is always lit",
+    "solar_eclipse": "Solar eclipse: the Moon covers the Sun and its shadow falls on Earth",
+    "lunar_eclipse": "Lunar eclipse: the Moon enters Earth's shadow and turns red",
+    "solar_system": "Solar system: shortened periods, distances not to scale",
+    "day_night": "Day and night: Earth spins, one half always faces the Sun",
+    "seasons": "Autumn: the 23.5° axis tilt decides how much sunlight arrives",
+    "launch": "Stage 1 separates and falls away",
+    "gravity": "Free fall: dropped together, an object takes longer to land on the Moon than on Earth or Jupiter. Faint balls mark equal time steps.",
+    "tides": "The Moon pulls the sea into a bulge toward it, and Earth spins beneath two bulges of water",
+    "aurora": "Aurora: the solar wind is steered to the poles by Earth's magnetic field, hits the atmosphere and glows",
+    "blackhole_lens": "Gravitational lens: starlight bends into an Einstein ring",
+    "star_life": "Red giant"
+  }
+}
