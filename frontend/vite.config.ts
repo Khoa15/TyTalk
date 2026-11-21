@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     // Same-origin in dev: the browser talks to /api, Vite forwards to FastAPI. No CORS needed.
-    proxy: { '/api': { target: 'http://localhost:8000', changeOrigin: false } },
+    proxy: { '/api': { target: process.env.VITE_API_TARGET ?? 'http://localhost:8000', changeOrigin: false } },
   },
   test: {
     environment: 'jsdom',

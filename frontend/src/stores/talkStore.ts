@@ -46,11 +46,11 @@ interface TalkState {
   /** The simulation on stage, if any. */
   sim: { evt: SimEvt; startedAt: number } | null;
   image: ImageEvt | null;
-  /** Tappable follow-up questions for the child, from the server's suggest event. */
-  suggestions: string[];
   busy: boolean;
   error: string | null;
   speakEnabled: boolean;
+  /** True while a voice clip is audible. Drives the Orb's speech motion. */
+  speaking: boolean;
 
   send: (text: string) => Promise<void>;
   toggleSpeak: () => void;
@@ -60,6 +60,8 @@ interface TalkState {
 
 let nextLineId = 1;
 let recognizer: SpeechRecognizer | null = null;
+// Number of voice clips currently audible; speaking is true while this is above zero.
+let clipsPlaying = 0;
 
 /** Client-side memory only: the server keeps no conversation. */
 export const useTalkStore = create<TalkState>()((set, get) => ({
@@ -73,10 +75,10 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
   entities: [],
   sim: null,
   image: null,
-  suggestions: [],
   busy: false,
   error: null,
   speakEnabled: true,
+  speaking: false,
 
   toggleSpeak: () => set({ speakEnabled: !get().speakEnabled }),
 
@@ -137,7 +139,6 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       reply: '',
       orbState: 'working',
       image: null,
-      suggestions: [],
       lines: [
         ...get().lines,
         { id: orbLineId - 1, role: 'user', text: message },
@@ -164,7 +165,12 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
         }
       },
       onAudio: (clip: AudioEvt) => {
-        if (get().speakEnabled) playWavBase64(clip.wav_base64);
+        if (!get().speakEnabled) return;
+        playWavBase64(
+          clip.wav_base64,
+          () => { clipsPlaying += 1; set({ speaking: true }); },
+          () => { clipsPlaying = Math.max(0, clipsPlaying - 1); set({ speaking: clipsPlaying > 0 }); },
+        );
       },
       onForm: (form) => set({ orbForm: form ?? 'orb' }),
       onEntities: (active) =>
@@ -220,11 +226,6 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
           });
           break;
         }
-        case 'suggest': {
-          const items = Array.isArray(data.items) ? data.items.map(String).slice(0, 3) : [];
-          set({ suggestions: items });
-          break;
-        }
         case 'done':
           doneReceived = true;
           player.start();
@@ -261,7 +262,8 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       history: [
         ...get().history,
         { role: 'user', text: message } as RecentMessage,
-        { role: 'assistant', text: replyText } as RecentMessage,
+        // An empty reply (failed request) is not sent back: the server rejects empty history turns.
+        ...(replyText.trim() ? [{ role: 'assistant', text: replyText } as RecentMessage] : []),
       ].slice(-HISTORY_LIMIT),
     });
   },

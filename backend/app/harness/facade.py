@@ -13,15 +13,13 @@ from app.harness.planner import PLANNER_PROMPT, parse_plan
 from app.harness.providers.base import LLMProvider, ProviderError, collect
 from app.harness.rag.retriever import CorpusRetriever, Evidence
 from app.harness.router import route_message
-from app.harness.stream_parser import Item, StateTag, StreamParser, SuggestTag, Text
+from app.harness.stream_parser import Item, StateTag, StreamParser, Text
 from app.harness.timeline import TimelineBuilder, estimate_speech_ms, event
 from app.harness.tts.tiny_voca import TinyVocaSynth
 from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
 REFUSAL_TEXT = "I can't help with that one. Let's explore science instead. Try one of these!"
-# Tappable fallbacks when Orb refuses: always topics the corpus covers.
-TOPIC_SUGGESTIONS = ("Why is the Moon bright?", "What is a black hole?", "How hot is the Sun?")
 OUTPUT_WINDOW = 300  # chars re-scanned by the output guard on every step
 _GREETING = re.compile(r"^\s*(hi+|hello|hey|yo|good (morning|afternoon|evening|night))\b", re.IGNORECASE)
 
@@ -111,9 +109,6 @@ class Harness:
                     for evt in builder.say(item.text, duration_ms, wav_b64):
                         yield evt
                     continue
-                if isinstance(item, SuggestTag):
-                    # Never offer a tap target the corpus cannot answer.
-                    item = SuggestTag(await self._grounded(item.items) or TOPIC_SUGGESTIONS)
                 for evt in builder.apply(item, image_map):
                     yield evt
         except ProviderError:
@@ -125,16 +120,6 @@ class Harness:
             yield event("error", {"code": "empty_reply"})
             return
         yield builder.done()
-
-    async def _grounded(self, items: tuple[str, ...]) -> tuple[str, ...]:
-        """Keep only suggestions the corpus can answer. Without a retriever nothing is filtered."""
-        if self._retriever is None:
-            return items
-        keep = []
-        for item in items:
-            if await run_in_threadpool(self._retriever.is_covered, item):
-                keep.append(item)
-        return tuple(keep)
 
     async def _tokens(self, messages: list[dict[str, str]]) -> AsyncIterator[Item]:
         parser = StreamParser()
@@ -168,6 +153,5 @@ class Harness:
     def _refusal(builder: TimelineBuilder, text: str = REFUSAL_TEXT) -> list[dict[str, Any]]:
         events = builder.apply(StateTag("surprised", 2.0), {})
         events += builder.say(text, estimate_speech_ms(text))
-        events += builder.apply(SuggestTag(TOPIC_SUGGESTIONS), {})
         events.append(builder.done())
         return events

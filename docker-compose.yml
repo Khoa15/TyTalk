@@ -29,6 +29,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./models:/app/models:ro
+      - ./backend/data:/app/data:ro
     depends_on:
       mysql:
         condition: service_healthy
@@ -37,6 +38,21 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+
+  web:
+    build: ./frontend
+    environment:
+      VITE_API_TARGET: http://api:8000
+    ports:
+      - "5174:5174"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   mysql_data:

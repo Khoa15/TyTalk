@@ -1,5 +1,4 @@
 from app.harness.followup import contextual_query, is_followup, last_promise, turn_hints
-from app.harness.stream_parser import StreamParser, SuggestTag
 from app.schemas.talk import RecentMessage
 
 HISTORY = [
@@ -27,12 +26,6 @@ def test_confused_child_gets_simpler_explanation_hint():
     hints = turn_hints("why?", HISTORY)
     assert any("simpler" in h for h in hints)
 
-
-def test_suggest_line_is_parsed_and_capped():
-    items = StreamParser().feed(
-        '{"type": "suggest", "items": ["Why is the Moon bright?", "", "What is a star?", "Is Mars cold?", "Extra?"]}\n'
-    )
-    assert items == [SuggestTag(("Why is the Moon bright?", "What is a star?", "Is Mars cold?"))]
 
 
 def test_hostile_promise_is_reduced_to_plain_words():

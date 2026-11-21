@@ -34,7 +34,7 @@ def test_injection_is_refused_as_stream_without_calling_llm(client):
     assert resp.status_code == 200
     assert resp.headers["content-type"].startswith("text/event-stream")
     events = _parse_events(resp.text)
-    assert events == ["segment", "text", "suggest", "done"]
+    assert events == ["segment", "text", "done"]
     assert "event: route" not in resp.text
 
 

@@ -46,6 +46,8 @@ export interface TyTalkOrbProps {
   level?: number;
   /** 0..1 how much the idle character shows personality (glances, bounces, tilts). Driven by user traits. */
   expressiveness?: number;
+  /** True while the voice is audible. Gives the breathing scale and speech halo in any state. */
+  speaking?: boolean;
   /** Called every animation frame with the motion values, handy for debugging graphs. */
   onFrame?: (frame: TyTalkOrbFrame) => void;
   className?: string;
@@ -64,6 +66,9 @@ const SPRING_ZETA = 0.5; // < 1 gives overshoot
 const FACE_OMEGA = 22;   // squash-and-stretch spring for the eye face
 const FACE_ZETA = 0.35;  // low damping: the face springs back past 1 (stretch)
 const FACE_SQUASH = 0.2; // face height right after a state change
+
+/** Sparkle positions around the rim (viewBox 400). */
+const SPARK_POS: [number, number][] = [[105, 105], [295, 105], [295, 295], [105, 295]];
 
 interface Pose { sc: number; x: number; y: number; tilt: number; glow: number; eyeY: number; look: number; fx: number; fy: number }
 type PoseKey = keyof Pose;
@@ -110,8 +115,9 @@ export function targetPose(st: OrbState, t: number, since: number, level: number
       P.look = e * (7 * Math.sin(t * 0.31) + 3 * Math.sin(t * 1.3)); // eyes glance around
       break;
     case 'talking':
-      P.sc = 1 + 0.09 * level;
-      P.glow = 0.5 + 0.45 * level;
+      // Gentle breathing even between syllables, plus a louder swell with the voice.
+      P.sc = 1 + 0.022 * Math.sin(t * 4.2) + 0.07 * level;
+      P.glow = 0.5 + 0.35 * level;
       break;
     case 'working':
       P.sc = 1 + 0.012 * Math.sin(t * 5);
@@ -166,7 +172,7 @@ export function targetPose(st: OrbState, t: number, since: number, level: number
 }
 
 export function TyTalkOrb({
-  state = 'idle', form = 'orb', size = 280, level, expressiveness = 0.5, onFrame, className, style, 'aria-label': ariaLabel,
+  state = 'idle', form = 'orb', size = 280, level, speaking = false, expressiveness = 0.5, onFrame, className, style, 'aria-label': ariaLabel,
 }: TyTalkOrbProps) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const id = (n: string) => `${uid}-${n}`;
@@ -178,6 +184,7 @@ export function TyTalkOrb({
   const orbitRef = useRef<SVGGElement>(null);
   const pillRef = useRef<SVGGElement>(null);
   const faceRef = useRef<SVGGElement>(null);
+  const haloRef = useRef<SVGCircleElement>(null);
 
   const stateRef = useRef<OrbState>(state);
   const formRef = useRef<OrbForm>(form);
@@ -189,6 +196,8 @@ export function TyTalkOrb({
   expressRef.current = expressiveness;
   frameRef.current = onFrame;
   stateRef.current = state;
+  const speakRef = useRef(speaking);
+  speakRef.current = speaking;
 
   // A form change must restyle the orb at once, not wait for the next state change.
   useEffect(() => {
@@ -208,7 +217,8 @@ export function TyTalkOrb({
 
     let raf = 0;
     let last = performance.now() / 1000;
-    let env = 0, target = 0, nextSyl = 0, nextBlink = last + 2.5, nextBounce = last + 4, orbitA = 0;
+    let env = 0, target = 0, nextSyl = 0, nextBlink = last + 2.5, nextBounce = last + 4, orbitA = 0, haloA = 0;
+    const sparks = Array.from(svg.querySelectorAll<SVGGElement>('.tyorb-spk'));
     let shown: OrbState = stateRef.current;
     let enteredAt = last;
     const pos: Pose = { ...REST };
@@ -261,7 +271,9 @@ export function TyTalkOrb({
         nextBounce = t + 4 + Math.random() * 5;
       }
 
-      if (shown === 'talking') {
+      // Voice is playing: either the talking state or real audio from the talk stream.
+      const speaking = shown === 'talking' || speakRef.current;
+      if (speaking) {
         const external = levelRef.current;
         if (external !== undefined) {
           target = Math.max(0, Math.min(1, external));
@@ -269,10 +281,17 @@ export function TyTalkOrb({
           target = Math.random() < 0.2 ? 0.05 : 0.35 + 0.65 * Math.random();
           nextSyl = t + 0.08 + 0.12 * Math.random();
         }
-        env += (target - env) * Math.min(1, dt * 14);
+      } else {
+        target = 0;
       }
+      env += (target - env) * Math.min(1, dt * 14);
 
-      springStep(pos, vel, targetPose(shown, t, t - enteredAt, env, k, e), dt, SPRING_OMEGA, SPRING_ZETA);
+      const tgt = targetPose(shown, t, t - enteredAt, env, k, e);
+      if (speakRef.current && shown !== 'talking') {
+        // Same breathing as the talking state, layered over the current expression.
+        tgt.sc = 1 + (0.022 * Math.sin(t * 4.2) + 0.07 * env) * k;
+      }
+      springStep(pos, vel, tgt, dt, SPRING_OMEGA, SPRING_ZETA);
 
       // Squash and stretch of the face (eye band).
       const faceTarget = 1;
@@ -310,6 +329,19 @@ export function TyTalkOrb({
       gy += (tgy - gy) * Math.min(1, dt * 8);
       if (pillRef.current) pillRef.current.style.transform = `translate(${((shown === 'idle' && pointer ? 0 : pos.look) + gx).toFixed(2)}px,${gy.toFixed(2)}px) scale(1,${(blink * pos.eyeY).toFixed(3)})`;
       orbitRef.current?.setAttribute('transform', `rotate(${(orbitA % 360).toFixed(1)} 200 200)`);
+
+      // Speech halo: fades in with the voice, shimmers, and sparkles around the rim.
+      const haloWant = speaking ? 0.25 + 0.75 * env : 0;
+      haloA += (haloWant - haloA) * Math.min(1, dt * 7);
+      const shimmer = haloA * k;
+      haloRef.current?.setAttribute('opacity', (0.8 * shimmer * (0.6 + 0.4 * Math.sin(t * 9))).toFixed(3));
+      sparks.forEach((sp, i) => {
+        const on = Math.max(0, Math.sin(t * 5.5 + i * 1.9));
+        const s = 0.7 + 1.1 * on;
+        const [sx, sy] = SPARK_POS[i];
+        sp.setAttribute('opacity', (shimmer * on).toFixed(3));
+        sp.setAttribute('transform', `translate(${sx} ${sy}) scale(${s.toFixed(3)})`);
+      });
       frameRef.current?.({ scale: pos.sc, x: pos.x, y: pos.y, tilt: pos.tilt, glow: pos.glow });
 
       raf = requestAnimationFrame(loop);
@@ -371,6 +403,12 @@ export function TyTalkOrb({
       </g>
 
       <g ref={bodyRef}>
+        <circle ref={haloRef} cx="200" cy="200" r="150" fill={ref('glowG')} opacity="0" />
+        {SPARK_POS.map(([sx, sy], i) => (
+          <g key={i} className="tyorb-spk" opacity="0" transform={`translate(${sx} ${sy}) scale(0.5)`}>
+            <path d="M0 -16 Q2 -2 16 0 Q2 2 0 16 Q-2 2 -16 0 Q-2 -2 0 -16Z" fill="var(--orb-glow2)" />
+          </g>
+        ))}
         <circle ref={glowRef} cx="200" cy="204" r="104" fill={ref('glowG')} opacity=".55" />
 
         <g className="tyorb-layer tyorb-orbit">

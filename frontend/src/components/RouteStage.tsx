@@ -1,11 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Routes, useLocation } from 'react-router-dom';
 
 import { TyTalkOrb, type OrbState } from './orb/TyTalkOrb';
 import { normalizeRoute, TransitionController, type Route } from '../lib/transitionGraph';
 import type { OrbForm } from '../lib/space/types';
 
-export interface SlotInfo { state: OrbState; form?: OrbForm; expressiveness: number; size: number }
+export interface SlotInfo { state: OrbState; form?: OrbForm; speaking?: boolean; expressiveness: number; size: number }
 interface SlotApi {
   register: (route: Route, el: HTMLDivElement, info: SlotInfo) => void;
   update: (route: Route, info: SlotInfo) => void;
@@ -59,7 +59,7 @@ export function RouteStage({ children }: { children: ReactNode }) {
   const update = useCallback((route: Route, info: SlotInfo) => {
     setSlots((prev) => {
       const cur = prev[route];
-      if (cur && cur.state === info.state && cur.expressiveness === info.expressiveness && cur.size === info.size && cur.form === info.form) return prev;
+      if (cur && cur.state === info.state && cur.expressiveness === info.expressiveness && cur.size === info.size && cur.form === info.form && cur.speaking === info.speaking) return prev;
       return { ...prev, [route]: info };
     });
   }, []);
@@ -73,6 +73,9 @@ export function RouteStage({ children }: { children: ReactNode }) {
       return next;
     });
   }, []);
+
+  // Stable API identity: a new object every render makes OrbSlot re-register in a loop.
+  const slotApi = useMemo(() => ({ register, update, unregister }), [register, update, unregister]);
 
   // A navigation starts (or retargets) the stage motion from whatever route is on screen.
   useEffect(() => {
@@ -132,7 +135,7 @@ export function RouteStage({ children }: { children: ReactNode }) {
   const shownLocation = { pathname: shown, search: '', hash: '', state: null, key: shown };
 
   return (
-    <SlotContext.Provider value={{ register, update, unregister }}>
+    <SlotContext.Provider value={slotApi}>
       <OrbTransitionContext.Provider value={orbState}>
         <div className="route-shell">
           <div ref={stageRef} className="route-stage">
@@ -140,7 +143,7 @@ export function RouteStage({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div ref={orbLayerRef} className="orb-layer" aria-hidden={false}>
-          <TyTalkOrb state={liveState} form={info?.form ?? 'orb'} size={ORB_BASE} expressiveness={info?.expressiveness ?? 0.5} aria-label="Orb" />
+          <TyTalkOrb state={liveState} form={info?.form ?? 'orb'} speaking={info?.speaking ?? false} size={ORB_BASE} expressiveness={info?.expressiveness ?? 0.5} aria-label="Orb" />
         </div>
       </OrbTransitionContext.Provider>
     </SlotContext.Provider>

@@ -7,7 +7,6 @@ Allowed objects (anything else is dropped):
   {"type": "form", "form": "<orb form>", "seconds": n}     -> Orb body form (action)
   {"type": "entity", "kind": "<entity>", "count": n, "seconds": n} -> summoned entity (action)
   {"type": "sim", "id": "<sim>", "params": {...}, "seconds": n}    -> astronomy simulation (action)
-  {"type": "suggest", "items": ["...", "..."]}             -> tappable follow-up questions (never spoken)
 
 Only "say" produces Text. Stray prose outside JSON is discarded, so stage directions
 such as "*waves*" can never reach TTS or subtitles.
@@ -23,8 +22,6 @@ DEFAULT_SECONDS = 2.0
 MAX_LINE_CHARS = 1000
 MAX_QUERY_CHARS = 80
 MAX_SAY_CHARS = 250  # tiny-voca reads one utterance per call; keep sentences short
-MAX_SUGGESTIONS = 3
-MAX_SUGGEST_CHARS = 60
 
 
 @dataclass(frozen=True)
@@ -58,18 +55,13 @@ class EntityTag:
 
 
 @dataclass(frozen=True)
-class SuggestTag:
-    items: tuple[str, ...]
-
-
-@dataclass(frozen=True)
 class SimTag:
     sim_id: str
     params: tuple[tuple[str, str], ...]  # sorted (name, value) pairs, already whitelisted
     seconds: float
 
 
-Item = Text | StateTag | ImageTag | FormTag | EntityTag | SimTag | SuggestTag
+Item = Text | StateTag | ImageTag | FormTag | EntityTag | SimTag
 
 
 class StreamParser:
@@ -145,19 +137,9 @@ def _to_item(obj: dict[str, Any]) -> Item | None:
             return None
         return SimTag(sim_id, _sim_params(sim_id, obj.get("params")), seconds)
 
-    if kind == "suggest":
-        return _suggest(obj.get("items"))
-
     return None
 
 
-def _suggest(raw: Any) -> SuggestTag | None:
-    """Keep up to 3 short, non-empty questions. Anything else is dropped."""
-    if not isinstance(raw, list):
-        return None
-    items = [i.strip()[:MAX_SUGGEST_CHARS] for i in raw if isinstance(i, str) and i.strip()]
-    items = list(dict.fromkeys(items))[:MAX_SUGGESTIONS]
-    return SuggestTag(tuple(items)) if items else None
 
 
 def _count(value: Any) -> int:
