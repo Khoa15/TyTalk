@@ -1,17 +1,16 @@
 services:
-  mysql:
-    image: mysql:8.4
+  postgres:
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: tytalk
-      MYSQL_USER: tytalk
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-tytalk}
+      POSTGRES_DB: tytalk
+      POSTGRES_USER: tytalk
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tytalk}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD:-root} --silent"]
+      test: ["CMD-SHELL", "pg_isready -U tytalk -d tytalk"]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -20,7 +19,7 @@ services:
     build: ./backend
     env_file: .env
     environment:
-      DATABASE_URL: mysql+pymysql://tytalk:${MYSQL_PASSWORD:-tytalk}@mysql:3306/tytalk
+      DATABASE_URL: postgresql+psycopg://tytalk:${POSTGRES_PASSWORD:-tytalk}@postgres:5432/tytalk
       HTTP_BODY_LOG: "true"
       TESTER_LOGIN_ENABLED: "true"
     ports:
@@ -31,7 +30,7 @@ services:
       - ./models:/app/models:ro
       - ./backend/data:/app/data:ro
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')"]
@@ -55,4 +54,4 @@ services:
         condition: service_healthy
 
 volumes:
-  mysql_data:
+  postgres_data:

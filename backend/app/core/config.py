@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     app_env: str = "dev"
     # Dev-only: log full request/response bodies (see app/core/http_log.py).
     http_body_log: bool = False
-    database_url: str = "mysql+pymysql://tytalk:tytalk@mysql:3306/tytalk"
+    # PostgreSQL via psycopg 3. Supabase: postgresql+psycopg://... (see backend/.env.example).
+    database_url: str = "postgresql+psycopg://tytalk:tytalk@postgres:5432/tytalk"
 
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
