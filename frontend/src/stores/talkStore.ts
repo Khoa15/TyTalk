@@ -10,6 +10,7 @@ import {
   type FormEvt,
   type ImageEvt,
   type SegmentEvt,
+  type TextEvt,
 } from '../lib/timelinePlayer';
 import type { OrbForm, SimEvt } from '../lib/space/types';
 import { ApiError } from '../services/apiClient';
@@ -147,11 +148,17 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
     });
 
     let finished = false;
-    let doneReceived = false;
     let replyText = '';
+    let doneReceived = false;
     const shownImages = new Set<string>();
     const player = new TimelinePlayer({
       onState: (orbState) => set({ orbState }),
+      // The reply appears word by word as Orb speaks it, not all at once.
+      onText: (visible) =>
+        set({
+          reply: visible,
+          lines: get().lines.map((l) => (l.id === orbLineId ? { ...l, text: visible } : l)),
+        }),
       onImage: (image) => {
         set({ image });
         // Each illustration joins the chat once, at the moment Orb shows it.
@@ -218,14 +225,11 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
           anchorOn(data.at_ms);
           player.addSim(data as unknown as SimEvt);
           break;
-        case 'text': {
+        case 'text':
           replyText += String(data.delta ?? '');
-          set({
-            reply: replyText,
-            lines: get().lines.map((l) => (l.id === orbLineId ? { ...l, text: replyText } : l)),
-          });
+          anchorOn(data.at_ms);
+          player.addText(data as unknown as TextEvt);
           break;
-        }
         case 'done':
           doneReceived = true;
           player.start();

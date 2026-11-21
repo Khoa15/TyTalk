@@ -7,11 +7,14 @@ export interface ImageEvt { url: string; caption: string; char_offset: number; a
 export interface AudioEvt { at_ms: number; duration_ms: number; char_offset: number; wav_base64: string }
 export interface FormEvt { form: OrbForm; at_ms: number; duration_ms: number }
 export interface EntityEvt { kind: EntityKind; count: number; at_ms: number; duration_ms: number }
+export interface TextEvt { delta: string; char_offset: number; at_ms: number; duration_ms: number }
 export type { SimEvt };
 
 export interface PlayerHandlers {
   onState: (state: OrbState) => void;
   onImage: (image: ImageEvt | null) => void;
+  /** The reply text revealed so far: it grows word by word while Orb speaks. */
+  onText?: (visible: string) => void;
   onAudio?: (audio: AudioEvt) => void;
   /** Orb body form changes (null = back to the plain orb). */
   onForm?: (form: OrbForm | null) => void;
@@ -33,6 +36,8 @@ export class TimelinePlayer {
   private forms: FormEvt[] = [];
   private entities: EntityEvt[] = [];
   private sims: SimEvt[] = [];
+  private texts: TextEvt[] = [];
+  private shownText = '';
   private nextAudio = 0;
   private t0: number | null = null;
   private totalMs: number | null = null;
@@ -87,6 +92,28 @@ export class TimelinePlayer {
     this.sims.push(sim);
   }
 
+  addText(text: TextEvt): void {
+    this.texts.push(text);
+  }
+
+  /** The prefix of the reply that Orb has spoken by `elapsed`, one chunk at a time. */
+  private visibleText(elapsed: number): string {
+    let out = '';
+    for (const t of [...this.texts].sort((a, b) => a.char_offset - b.char_offset)) {
+      if (elapsed < t.at_ms) break;
+      const frac = Math.min(1, (elapsed - t.at_ms) / Math.max(t.duration_ms, 1));
+      out += t.delta.slice(0, Math.round(frac * t.delta.length));
+      if (frac < 1) break;
+    }
+    return out;
+  }
+
+  private revealText(text: string): void {
+    if (text === this.shownText) return;
+    this.shownText = text;
+    this.handlers.onText?.(text);
+  }
+
   /** Called when the server's `done` event arrives. Playback ends once elapsed passes total. */
   finish(totalMs: number): void {
     this.totalMs = totalMs;
@@ -130,6 +157,8 @@ export class TimelinePlayer {
       this.handlers.onSim?.(sim);
     }
 
+    this.revealText(this.visibleText(elapsed));
+
     while (this.nextAudio < this.audios.length && elapsed >= this.audios[this.nextAudio].at_ms) {
       const clip = this.audios[this.nextAudio];
       this.nextAudio += 1;
@@ -139,6 +168,7 @@ export class TimelinePlayer {
 
     if (this.totalMs !== null && elapsed >= this.totalMs) {
       this.ended = true;
+      this.revealText(this.texts.map((t) => t.delta).join(''));
       this.handlers.onState('idle');
       if (this.currentImage) {
         this.currentImage = null;

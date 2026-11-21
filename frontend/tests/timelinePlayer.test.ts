@@ -101,3 +101,29 @@ describe('TimelinePlayer audio', () => {
     expect(played).toEqual([0, 1000]);
   });
 });
+
+describe('TimelinePlayer text reveal', () => {
+  it('reveals reply text in step with the voice, chunk by chunk', () => {
+    const clock = fakeClock();
+    const shown: string[] = [];
+    const player = new TimelinePlayer(
+      { onState: () => {}, onImage: () => {}, onText: (v) => shown.push(v), onEnd: () => {} },
+      clock.now,
+    );
+    player.addText({ delta: 'Hello', char_offset: 0, at_ms: 0, duration_ms: 1000 });
+    player.addText({ delta: ' world', char_offset: 5, at_ms: 1000, duration_ms: 1000 });
+    player.start();
+    player.finish(2000);
+
+    player.tick(); // 0 ms: nothing spoken yet
+    clock.advance(500);
+    player.tick(); // half of "Hello"
+    clock.advance(500);
+    player.tick(); // "Hello" done
+    clock.advance(1000);
+    player.tick(); // whole reply
+
+    // Nothing is emitted while the text is still empty; each change is one emission.
+    expect(shown).toEqual(['Hel', 'Hello', 'Hello world']);
+  });
+});

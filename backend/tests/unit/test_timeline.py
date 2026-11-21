@@ -53,3 +53,11 @@ def test_done_total_covers_last_image_end():
     fetched = {"cat": ImageResult("cat", "https://upload.wikimedia.org/a.jpg", "Cat")}
     events = _run([StateTag("talking", 2), ImageTag("cat", 4)], fetched)
     assert events[-1]["data"]["total_ms"] == 2000 + 4000
+
+
+def test_text_is_timed_like_the_voice():
+    events = _run([Text("abc"), Text("de")])
+    texts = [e["data"] for e in events if e["event"] == "text"]
+    assert texts[0]["at_ms"] == 0
+    assert texts[1]["at_ms"] == texts[0]["duration_ms"]
+    assert all(t["duration_ms"] > 0 for t in texts)

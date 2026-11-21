@@ -47,7 +47,18 @@ class TimelineBuilder:
 
     def say(self, text: str, duration_ms: int, wav_base64: str | None = None) -> list[dict[str, Any]]:
         """Speech advances the shared cursor by its duration (real audio, or an estimate when silent)."""
-        events = [event("text", {"delta": text, "char_offset": self._char_offset})]
+        # Text is timed like the voice: the client reveals it over [at_ms, at_ms + duration_ms].
+        events = [
+            event(
+                "text",
+                {
+                    "delta": text,
+                    "char_offset": self._char_offset,
+                    "at_ms": self._cursor_ms,
+                    "duration_ms": duration_ms,
+                },
+            )
+        ]
         if wav_base64:
             events.append(
                 event(
