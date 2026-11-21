@@ -43,6 +43,22 @@ class Settings(BaseSettings):
 
     image_domain_allowlist: list[str] = ["upload.wikimedia.org", "thumb.wikimedia.org"]
 
+    # RAG: grounded answers from the local PDF corpus (see app/harness/rag).
+    rag_enabled: bool = True
+    rag_sources_dir: str = "data/rag/sources"
+    rag_index_dir: str = "data/rag/index"
+    # Local English embedding model (fastembed, ONNX, CPU, 384 dims). The project is English-only.
+    # Must match the index it was built with: change it, then re-run ingest.
+    rag_embed_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    # Optional cross-encoder reranker. Empty disables it. Off by default until the eval favours it.
+    rag_rerank_model: str = ""
+    rag_chunk_chars: int = 1400
+    rag_chunk_overlap_chars: int = 200
+    rag_candidates: int = 20  # top-k per retriever before fusion
+    rag_top_k: int = 4  # chunks handed to the LLM
+    # Minimum top-1 cosine similarity for the corpus to count as evidence. Below it: refuse.
+    rag_min_score: float = 0.35
+
 
 @lru_cache
 def get_settings() -> Settings:

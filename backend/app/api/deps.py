@@ -18,6 +18,7 @@ from app.harness.guardrails.input_guards import build_input_chain
 from app.harness.guardrails.output_guards import build_output_chain
 from app.harness.prompts import CANARY
 from app.harness.providers.factory import build_provider
+from app.harness.rag.retriever import default_retriever
 from app.harness.providers.logged import LoggedProvider
 from app.harness.tools.image_search import ImageSearchTool
 from app.harness.tts.tiny_voca import TinyVocaSynth
@@ -86,10 +87,12 @@ def get_harness() -> Harness:
     model_file = Path(settings.tts_model_dir) / "onnx" / "model.onnx"
     if settings.tts_enabled and model_file.exists():
         tts = TinyVocaSynth(settings.tts_model_dir)
+    retriever = default_retriever() if settings.rag_enabled else None
     return Harness(
         provider=provider,
         images=ImageSearchTool(allowed_hosts=settings.image_domain_allowlist),
         input_guard=build_input_chain(),
         output_guard=build_output_chain(CANARY),
         tts=tts,
+        retriever=retriever,
     )

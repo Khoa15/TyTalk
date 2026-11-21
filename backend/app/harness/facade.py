@@ -1,4 +1,5 @@
 import base64
+import re
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
@@ -9,6 +10,7 @@ from app.harness.composer import build_messages
 from app.harness.guardrails.chain import GuardChain
 from app.harness.planner import PLANNER_PROMPT, parse_plan
 from app.harness.providers.base import LLMProvider, ProviderError, collect
+from app.harness.rag.retriever import CorpusRetriever, Evidence
 from app.harness.router import route_message
 from app.harness.stream_parser import Item, StateTag, StreamParser, Text
 from app.harness.timeline import TimelineBuilder, estimate_speech_ms, event
@@ -17,7 +19,14 @@ from app.harness.tools.image_search import ImageResult, ImageSearchTool
 from app.schemas.talk import RecentMessage
 
 REFUSAL_TEXT = "I can't help with that. Please try asking in a different way."
+NO_EVIDENCE_TEXT = "Hmm, Orb is not sure about that yet. Want to ask me a different science question?"
 OUTPUT_WINDOW = 300  # chars re-scanned by the output guard on every step
+_GREETING = re.compile(r"^\s*(hi+|hello|hey|yo|good (morning|afternoon|evening|night))\b", re.IGNORECASE)
+
+
+def is_greeting(message: str) -> bool:
+    """Plain greetings get a friendly reply without retrieval; every other turn needs evidence."""
+    return bool(_GREETING.match(message)) and len(message.split()) <= 8
 
 
 @dataclass(frozen=True)
@@ -42,9 +51,11 @@ class Harness:
         input_guard: GuardChain,
         output_guard: GuardChain,
         tts: TinyVocaSynth | None = None,
+        retriever: CorpusRetriever | None = None,
     ) -> None:
         self.provider = provider
         self._tts = tts
+        self._retriever = retriever
         self._images = images
         self._input_guard = input_guard
         self._output_guard = output_guard
@@ -60,6 +71,15 @@ class Harness:
         route = route_message(message)
         yield event("route", {"route": route})
 
+        evidence: list[Evidence] = []
+        if self._retriever is not None and not is_greeting(message):
+            evidence = await run_in_threadpool(self._retriever.retrieve, message)
+            if not evidence:
+                # No passage supports an answer: refuse without calling the model.
+                for evt in self._refusal(TimelineBuilder(), NO_EVIDENCE_TEXT):
+                    yield evt
+                return
+
         image_map: dict[str, ImageResult] = {}
         queries: list[str] = []
         if route == "plan":
@@ -67,7 +87,9 @@ class Harness:
             image_map = await self._images.search_many(queries)
             yield event("plan", {"steps": [f"Find image: {q}" for q in queries]})
 
-        messages = build_messages(ctx.traits, message, recent, list(image_map), self._input_guard)
+        messages = build_messages(
+            ctx.traits, message, recent, list(image_map), self._input_guard, evidence or None
+        )
         builder = TimelineBuilder()
         spoken = ""
         try:
@@ -123,8 +145,8 @@ class Harness:
         return duration_ms, base64.b64encode(wav).decode("ascii")
 
     @staticmethod
-    def _refusal(builder: TimelineBuilder) -> list[dict[str, Any]]:
+    def _refusal(builder: TimelineBuilder, text: str = REFUSAL_TEXT) -> list[dict[str, Any]]:
         events = builder.apply(StateTag("surprised", 2.0), {})
-        events += builder.say(REFUSAL_TEXT, estimate_speech_ms(REFUSAL_TEXT))
+        events += builder.say(text, estimate_speech_ms(text))
         events.append(builder.done())
         return events

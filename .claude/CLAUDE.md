@@ -8,3 +8,9 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
+
+## Language
+
+This project focuses on **English only**: the UI copy, the Orb replies, the RAG corpus and the models.
+- Use the English embedding model `sentence-transformers/all-MiniLM-L6-v2` for RAG (`RAG_EMBED_MODEL`). Do not switch to a multilingual model unless the user asks.
+- Write new documentation, prompts and eval questions in English.
