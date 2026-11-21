@@ -1,81 +1,98 @@
-# TyTalk — Bầu trời đầy sao bắt đầu từ một cuộc trò chuyện
+# TyTalk — Every question is a trip into space
 
-**TyTalk** đưa bé từ 5 đến 15 tuổi lên hành trình khám phá Thiên Văn và Vũ Trụ, qua trò chuyện bằng giọng nói với **Orb**, một người bạn nhỏ hình ngôi sao.
+<p align="center">
+  <img src="docs/images/landing.jpg" alt="TyTalk landing page with the Orb star and a Get Started button" width="320" />
+</p>
 
-Bé hỏi gì, Orb trả lời nấy: vì sao có ngày có đêm, Mặt Trăng đổi hình dạng thế nào, hố đen có thật không, tên lửa bay lên vũ trụ ra sao. Mỗi câu trả lời đi kèm hình ảnh, hiệu ứng và mô phỏng sinh động, để bé không chỉ nghe mà còn **nhìn thấy** vũ trụ đang hoạt động.
+**TyTalk** takes children aged 5 to 15 on a journey through astronomy and space. Kids talk to **Orb**, a friendly star-shaped companion, and Orb answers out loud with short, clear explanations.
+
+Ask why there is day and night, how the Moon changes shape, whether black holes are real, or how a rocket reaches orbit. Each answer comes with pictures, animations and simple simulations, so kids don't just hear about space; they **see** it at work.
+
+<video src="docs/images/tytalk-pitch.mp4" controls width="720"></video>
+
+> [Watch the 30-second pitch video](docs/images/tytalk-pitch.mp4)
 
 ---
 
-## Vấn đề
+## The problem
 
-- Thiên Văn hấp dẫn trẻ em, nhưng sách và video thường quá dài, quá khô hoặc quá nhiều thuật ngữ.
-- Trẻ hay hỏi "Tại sao?" liên tục. Phụ huynh và giáo viên không phải lúc nào cũng có sẵn câu trả lời đơn giản, đúng và phù hợp độ tuổi.
-- Internet mở ra cả thế giới, nhưng không phải nội dung nào cũng an toàn cho trẻ.
+- Astronomy fascinates children, but books and videos are often too long, too dry, or full of jargon.
+- Kids ask "Why?" nonstop. Parents and teachers don't always have a simple, accurate, age-appropriate answer ready.
+- The internet opens up the whole world, but not all of it is safe for children.
 
-## Giải pháp
+## The solution
 
-TyTalk là một người bạn đồng hành học tập:
+TyTalk is a learning companion that:
 
-- **Nói chuyện tự nhiên**: bé hỏi bằng lời, Orb đáp bằng lời, ngắn gọn và dễ hiểu.
-- **Học bằng hình ảnh và mô phỏng**: Orb biến thành Mặt Trời, Trái Đất, Mặt Trăng, thiên hà xoáy hay hố đen để minh họa ngay điều đang nói.
-- **Giải thích bằng ví dụ quen thuộc**: quả bóng, cây đèn pin, chiếc bánh quy thay cho những khái niệm trừu tượng.
-- **Chỉ nói về vũ trụ**: mọi câu hỏi lạc đề được đưa nhẹ nhàng về chủ đề không gian.
-- **An toàn cho trẻ**: không hỏi thông tin cá nhân như tên trường, địa chỉ, số điện thoại hay ảnh của bé. Nội dung đáng sợ hoặc không phù hợp với trẻ em sẽ được từ chối một cách nhẹ nhàng.
+- **Talks naturally.** Kids ask in their own words, and Orb replies in short, easy-to-follow sentences.
+- **Teaches with pictures and simulations.** Orb becomes the Sun, Earth, Moon, a spiral galaxy or a black hole to show exactly what it is describing.
+- **Explains with familiar examples.** A ball, a flashlight or a cookie stands in for abstract ideas.
+- **Stays on space.** Off-topic questions are gently steered back to the universe.
+- **Keeps children safe.** It never asks for personal details such as a school name, address, phone number or photo. Frightening or unsuitable content is declined gently.
 
-## Bé sẽ được gì
+<p align="center">
+  <img src="docs/images/talk-start.jpg" alt="Orb waiting for a question on the talk screen" width="360" />
+  &nbsp;
+  <img src="docs/images/talk-conversation.jpg" alt="A child asks why there is day and night, and Orb answers with a simple ball-and-torch example" width="360" />
+</p>
 
-| Với bé | Với phụ huynh và giáo viên |
+## What kids and families get
+
+| For kids | For parents and teachers |
 |---|---|
-| Hiểu vì sao có Nhật thực, Nguyệt thực, các mùa, thủy triều | Có một trợ giảng Thiên Văn luôn sẵn sàng, giải thích đúng ở mức tuổi của con |
-| Được tự đặt câu hỏi, không ngại hỏi lại | Nội dung được thiết kế riêng cho trẻ 5–15 tuổi, không phải nội dung người lớn |
-| Ghi nhớ kiến thức nhờ hình ảnh và trò chơi tương tác | Không lưu nội dung trò chuyện: chỉ lưu tài khoản và đặc điểm cá nhân hóa cơ bản |
-| Mỗi ngày một điều mới về vũ trụ | Dễ dùng ở nhà hoặc trên lớp, chỉ cần trình duyệt |
+| Understand eclipses, seasons and tides | An always-available space tutor that explains at the child's level |
+| Ask questions freely, without fear of asking again | Content designed for ages 5–15, not adult material |
+| Remember what they learn through pictures and interactive play | No conversation content is stored: only the account and basic personalization |
+| A new space fact every day | Easy to use at home or in class, with nothing more than a web browser |
 
-## Các phần chính của trải nghiệm
+## Highlights of the experience
 
-- **Orb, người bạn hình sao**: giọng nói vui tươi, hoạt bát, luôn khích lệ bé tò mò.
-- **Hình biến đổi**: Orb hóa thành Mặt Trời, Trái Đất, Mặt Trăng, thiên hà hoặc hố đen khi câu chuyện cần.
-- **Mô phỏng vũ trụ**: ngày và đêm, các pha Mặt Trăng, nhật thực và nguyệt thực, hệ Mặt Trời, trọng lực trên Trái Đất, Sao Hỏa, Mộc Tinh, thủy triều, cực quang, vòng đời của sao, tên lửa phóng lên.
-- **Hình ảnh minh họa**: tranh và ảnh liên quan được hiển thị ngay khi Orb đang kể.
-- **Mỗi câu trả lời đều ngắn gọn**: vài câu thôi, đủ để bé hiểu và muốn hỏi tiếp.
+- **Orb, the star friend**: a cheerful, lively voice that keeps kids curious.
+- **Shape-shifting visuals**: Orb turns into the Sun, Earth, Moon, a galaxy or a black hole when the story calls for it.
+- **Space simulations**: day and night, Moon phases, solar and lunar eclipses, the Solar System, gravity on Earth, Mars, Jupiter, tides, auroras, the life cycle of a star, and rockets lifting off.
+- **Illustrations as Orb speaks**: related pictures appear as the explanation unfolds.
+- **Short answers**: a few sentences at a time, enough to understand and enough to make kids want to ask more.
 
-## Dành cho ai
+## Who it's for
 
-- **Trẻ 5–15 tuổi** muốn khám phá vũ trụ theo cách vui và dễ hiểu.
-- **Phụ huynh** muốn con học thêm kiến thức khoa học trong một môi trường an toàn.
-- **Giáo viên và người hướng dẫn** cần một công cụ minh họa sinh động cho bài học về Thiên Văn.
+- **Children aged 5–15** who want to explore the universe in a fun, easy way.
+- **Parents** who want their kids to learn real science in a safe environment.
+- **Teachers and educators** who need vivid visuals for astronomy lessons.
 
-## Bắt đầu nhanh
+## Quick start
 
-Yêu cầu: Docker, Python 3.13 và Node.js.
+Requirements: Docker, Python 3.13 and Node.js.
 
-1. Sao chép cấu hình mẫu và điền thông tin:
+1. Copy the example configuration and fill in your values:
 
    ```bash
    cp .env.example .env
    ```
 
-   Điền `JWT_SECRET` và `LLM_API_KEY`. Không commit file `.env`.
+   Set `JWT_SECRET` and `LLM_API_KEY`. Never commit `.env`.
 
-2. Khởi động cơ sở dữ liệu MySQL:
+2. Start the MySQL database:
 
    ```bash
    docker compose up -d
    ```
 
-3. Chạy backend (FastAPI) và frontend (React + Vite) theo hướng dẫn trong thư mục `backend/` và `frontend/`.
+3. Run the backend (FastAPI) and frontend (React + Vite) by following the instructions in `backend/` and `frontend/`.
 
-4. Mở trình duyệt, vào trang chủ và bấm **Get Started** để bắt đầu trò chuyện cùng Orb.
+4. Open the app in your browser, go to the home page and click **Get Started** to start talking with Orb.
 
-## Công nghệ
+## Tech stack
 
-- **Backend**: FastAPI, Python 3.13, MySQL 8, xác thực JWT.
+- **Backend**: FastAPI, Python 3.13, MySQL 8, JWT authentication.
 - **Frontend**: React, Vite, TypeScript.
-- **AI**: tương thích mọi endpoint OpenAI-compatible (OpenRouter, OpenAI, DeepSeek, Gemini, Qwen, Anthropic Claude…), chỉ cần đổi cấu hình.
-- **Triển khai**: Docker Compose.
+- **AI**: works with any OpenAI-compatible endpoint (OpenRouter, OpenAI, DeepSeek, Gemini, Qwen, Anthropic Claude and more). Switching is a configuration change.
+- **Deployment**: Docker Compose.
 
-Tài liệu thiết kế cơ sở dữ liệu nằm tại [docs/erd.md](docs/erd.md). Bộ thiết kế giao diện vũ trụ nằm tại [docs/space-design-system.html](docs/space-design-system.html).
+Design and data documentation:
+
+- [Database ERD](docs/erd.md)
+- [Space design system](docs/space-design-system.html)
 
 ---
 
-**TyTalk**: mỗi câu hỏi của bé là một chuyến bay mới vào vũ trụ.
+**TyTalk**: every question a child asks is a new flight into space.

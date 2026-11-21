@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #09090d;
+        --ink: #ffffff;
+        --muted: #b7b1d6;
+        --accent: #8b5cf6;
+        --accent-2: #d946ef;
+        --font-display: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--ground);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: radial-gradient(ellipse at 50% 40%, #1a1030 0%, var(--ground) 65%);
+        font-family: var(--font-display);
+        color: var(--ink);
+        overflow: hidden;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .huge {
+        font-size: 150px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.02;
+      }
+      .big {
+        font-size: 96px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .sub {
+        font-size: 44px;
+        font-weight: 400;
+        color: var(--muted);
+        margin-top: 28px;
+      }
+      .grad {
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .list {
+        display: flex;
+        gap: 56px;
+        font-size: 64px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .list span {
+        padding: 22px 40px;
+        border: 2px solid rgba(139, 92, 246, 0.6);
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.12);
+      }
+      .shot {
+        width: 760px;
+        border-radius: 28px;
+        box-shadow: 0 30px 90px rgba(139, 92, 246, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .orb {
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 50% 85%, rgba(217, 70, 239, 0.55), transparent 55%),
+          radial-gradient(circle at 35% 30%, #3b2a66, #0d0b18 60%);
+        border: 3px solid rgba(190, 170, 255, 0.7);
+        box-shadow: 0 0 120px rgba(217, 70, 239, 0.55);
+        position: relative;
+        margin-bottom: 48px;
+      }
+      /* Two white eyes, as in the app's Orb */
+      .orb::before,
+      .orb::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 22px;
+        height: 58px;
+        margin-top: -29px;
+        background: #fff;
+        border-radius: 999px;
+      }
+      .orb::before {
+        left: 33%;
+      }
+      .orb::after {
+        right: 33%;
+      }
+      .cta {
+        margin-top: 60px;
+        padding: 26px 64px;
+        font-size: 48px;
+        font-weight: 600;
+        color: #fff;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+      .stars {
+        position: absolute;
+        inset: 0;
+        background-image:
+          radial-gradient(2px 2px at 12% 18%, #fff, transparent),
+          radial-gradient(2px 2px at 78% 12%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 40% 80%, #fff, transparent),
+          radial-gradient(2px 2px at 88% 70%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 22% 60%, #fff, transparent),
+          radial-gradient(2px 2px at 60% 35%, #fff, transparent);
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="28.6"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div class="stars clip" data-start="0" data-duration="28.6" data-track-index="0"></div>
+
+      <!-- 0-2.6s: Hook. Scene slots follow the voiceover: each ends 1 s after its line. -->
+      <div id="hook" class="clip" data-start="0" data-duration="2.6" data-track-index="1">
+        <div class="huge">Every kid asks <span class="grad">"Why?"</span></div>
+      </div>
+
+      <!-- 2.6-6.64s: Problem -->
+      <div id="problem" class="clip" data-start="2.6" data-duration="4.04" data-track-index="2">
+        <div class="big">Space is big.<br />Answers are hard to find.</div>
+        <div class="sub">Books are too long. Videos are too dry. The internet is not always safe.</div>
+      </div>
+
+      <!-- 6.64-12.13s: Solution -->
+      <div id="solution" class="clip" data-start="6.64" data-duration="5.49" data-track-index="3">
+        <div class="orb"></div>
+        <div class="big">Meet <span class="grad">TyTalk</span></div>
+        <div class="sub">Talk with Orb, a friendly star that answers out loud.</div>
+      </div>
+
+      <!-- 12.13-17.83s: Proof: real product screenshot -->
+      <div id="proof" class="clip" data-start="12.13" data-duration="5.7" data-track-index="4">
+        <img class="shot" src="assets/talk-conversation.jpg" alt="Orb answering a child's question" />
+        <div class="sub" style="margin-top: 36px; font-size: 40px">
+          Ask a question. Orb answers in simple words.
+        </div>
+      </div>
+
+      <!-- 17.83-22.23s: Benefits -->
+      <div id="benefits" class="clip" data-start="17.83" data-duration="4.4" data-track-index="5">
+        <div class="list">
+          <span>Simple</span><span>Safe</span><span>Made for ages 5–15</span>
+        </div>
+        <div class="sub">Every answer ends with another question to explore.</div>
+      </div>
+
+      <!-- 22.23-28.6s: End card -->
+      <div id="endcard" class="clip" data-start="22.23" data-duration="6.37" data-track-index="6">
+        <div class="big grad">TyTalk</div>
+        <div class="sub">Every question is a new trip into space.</div>
+        <div class="cta">Get Started →</div>
+      </div>
+
+      <!-- Voiceover: one clip per scene, timed to the scene start -->
+      <audio id="vo-hook" src="assets/vo/hook.wav" data-start="0.2" data-duration="1.45" data-volume="1"></audio>
+      <audio id="vo-problem" src="assets/vo/problem.wav" data-start="2.8" data-duration="2.9" data-volume="1"></audio>
+      <audio id="vo-solution" src="assets/vo/solution.wav" data-start="6.84" data-duration="4.3" data-volume="1"></audio>
+      <audio id="vo-proof" src="assets/vo/proof.wav" data-start="12.33" data-duration="4.55" data-volume="1"></audio>
+      <audio id="vo-benefits" src="assets/vo/benefits.wav" data-start="18.03" data-duration="3.25" data-volume="1"></audio>
+      <audio id="vo-endcard" src="assets/vo/endcard.wav" data-start="22.43" data-duration="3.25" data-volume="1"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene in/out helpers: each scene fades in, holds, then fades out before its slot ends.
+      const scene = (id, start, end) => {
+        tl.fromTo(
+          id,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+          start,
+        );
+        tl.to(id, { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, end - 0.5);
+      };
+
+      // Hook is visible from frame 0 so the thumbnail is never empty.
+      tl.set("#hook", { opacity: 1, y: 0 }, 0);
+      tl.to("#hook", { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, 2.1);
+      tl.to("#hook .huge", { scale: 1.04, duration: 2.6, ease: "none" }, 0);
+
+      // Each scene cuts to the next right after its voiceover line ends (1 s hold).
+      scene("#problem", 2.6, 6.64);
+      scene("#solution", 6.64, 12.13);
+      scene("#proof", 12.13, 17.83);
+      scene("#benefits", 17.83, 22.23);
+
+      // Slow drifts keep each scene moving while its line plays.
+      tl.to("#problem", { scale: 1.03, duration: 4.04, ease: "none" }, 2.6);
+      tl.to("#proof .shot", { scale: 1.05, duration: 5.7, ease: "none" }, 12.13);
+      tl.to("#benefits", { scale: 1.03, duration: 4.4, ease: "none" }, 17.83);
+
+      // End card: fade in and hold until the video ends.
+      tl.fromTo(
+        "#endcard",
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
+        22.23,
+      );
+
+      // Orb pulse during the solution scene.
+      tl.to(".orb", { scale: 1.06, duration: 1.2, yoyo: true, repeat: 2, ease: "sine.inOut" }, 7.0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
