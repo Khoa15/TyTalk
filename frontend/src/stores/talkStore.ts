@@ -260,9 +260,10 @@ export const useTalkStore = create<TalkState>()((set, get) => ({
       }
     }
 
-    // Drop an empty Orb line when the request failed before any text arrived.
+    // Drop an empty Orb line only when no text arrived at all (failed request). The timeline may
+    // still be revealing text after the stream ends, so the line must stay until then.
     set({
-      lines: get().lines.filter((l) => !(l.id === orbLineId && l.text === '')),
+      lines: get().lines.filter((l) => !(l.id === orbLineId && l.text === '' && !replyText)),
       history: [
         ...get().history,
         { role: 'user', text: message } as RecentMessage,
