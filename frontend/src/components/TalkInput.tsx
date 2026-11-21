@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 interface Props {
   disabled: boolean;
@@ -9,10 +9,24 @@ interface Props {
 
 export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
   const [value, setValue] = useState('');
+  // Enter while Orb is still answering: keep one message and send it when Orb is free.
+  const [queued, setQueued] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!disabled && queued) {
+      onSend(queued);
+      setQueued(null);
+    }
+  }, [disabled, queued, onSend]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!value.trim() || disabled) return;
+    if (!value.trim()) return;
+    if (disabled) {
+      setQueued(value);
+      setValue('');
+      return;
+    }
     onSend(value);
     setValue('');
   };
@@ -21,7 +35,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
     <form className="talk-input" onSubmit={submit}>
       <input
         aria-label="Message"
-        placeholder="Say something to Orb…"
+        placeholder={queued ? `Orb will hear "${queued}" next…` : 'Say something to Orb…'}
         maxLength={1000}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -40,7 +54,7 @@ export function TalkInput({ disabled, listening, onSend, onToggleMic }: Props) {
           <path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </button>
-      <button type="submit" disabled={disabled || !value.trim()}>
+      <button type="submit" disabled={!value.trim()}>
         Send
       </button>
     </form>
