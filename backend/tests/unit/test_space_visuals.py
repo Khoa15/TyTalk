@@ -107,3 +107,11 @@ def test_prompt_makes_orb_playful_and_announces_form_changes():
     assert "AFTER the answer and never instead of it" in prompt
     assert "Ta-da" not in prompt.split("FORM CHANGES")[1].split("STORY GUIDE")[0]
     assert "Never sarcastic, never mean, never scary" in prompt
+
+
+def test_sim_lasts_at_least_two_seconds():
+    from app.harness.stream_parser import SimTag
+    from app.harness.timeline import TimelineBuilder
+
+    evts = TimelineBuilder().apply(SimTag("moon_phases", (), 0.5), {})
+    assert evts[0]["data"]["duration_ms"] >= 2000

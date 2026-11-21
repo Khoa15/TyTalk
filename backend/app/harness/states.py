@@ -15,6 +15,8 @@ MAX_SEGMENTS = 3
 MAX_IMAGES = 5
 MIN_SECONDS = 0.5
 MAX_SECONDS = 8.0
+# Every simulation stays on stage at least this long, so the child can see it.
+SIM_MIN_SECONDS = 2.0
 
 # Orb body forms (eyes stay the same; only the body, glow and background motion change).
 ORB_FORMS: tuple[str, ...] = ("orb", "sun", "earth", "moon", "galaxy", "blackhole")

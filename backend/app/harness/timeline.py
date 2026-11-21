@@ -8,6 +8,7 @@ from app.harness.states import (
     MAX_SEGMENTS,
     MAX_SIMS,
     MIN_SECONDS,
+    SIM_MIN_SECONDS,
 )
 from app.harness.stream_parser import EntityTag, FormTag, ImageTag, Item, SimTag, StateTag, SuggestTag, Text
 from app.harness.tools.image_search import ImageResult
@@ -139,7 +140,7 @@ class TimelineBuilder:
         if self._sims >= MAX_SIMS:
             return []
         self._sims += 1
-        at_ms, duration = self._start_visual(tag.seconds)
+        at_ms, duration = self._start_visual(max(tag.seconds, SIM_MIN_SECONDS))
         return [
             event(
                 "sim",
