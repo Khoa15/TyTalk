@@ -1,0 +1,16 @@
+{
+  "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "chunk_chars": 1400,
+  "chunk_overlap_chars": 200,
+  "chunks": 457,
+  "sources": {
+    "chandra_black_hole_primer.pdf": "4c2950f29beca24edb73c181b1f061357438e65123388404997056daaacd31c6",
+    "chandra_fun_pad.pdf": "902dd3096c9b95814e42d33d5722d7cb8ef5c2846bccc827f013a9e73eff93ba",
+    "chandra_hot_stories_6-11.pdf": "43f43e0e74ff09dfbc85fe9423e16e64d979cf48b7b467371282f4c75e2718a4",
+    "esa_astronomy_primary_en.pdf": "21b69e2d5a671e7afbd755635c6a8ff18125e1fb06162e8607b0075cb136ed0b",
+    "esa_our_solar_system_teacher_guide.pdf": "1b72adb7d20dcb3c65e09e23b3dd010d43f30a2dc9a82615f112ba8e60233de3",
+    "nasa_life_cycles_of_stars.pdf": "9cdaf837ef2afe62f6a703497b961b46a9db745f6bc78814fbce32ec218d80e7",
+    "nasa_rockets_educator_guide.pdf": "e973d4bdf4a48eefbd159b130e1d401fab5f4fe0e617d1c9167f73dfad455438",
+    "nasa_spotlite_moon_phases_4-8.pdf": "6c2ed070773b1c04a849a563abec138df8613338c024ee281cf22e8579c92b1f"
+  }
+}

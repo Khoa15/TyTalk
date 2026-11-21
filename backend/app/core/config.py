@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     http_body_log: bool = False
     # PostgreSQL via psycopg 3. Supabase: postgresql+psycopg://... (see backend/.env.example).
     database_url: str = "postgresql+psycopg://tytalk:tytalk@postgres:5432/tytalk"
+    # Apply Alembic migrations when the app starts. Needed on Vercel, where no CMD runs alembic.
+    run_migrations_on_start: bool = False
 
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
